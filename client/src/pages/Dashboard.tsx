@@ -7,6 +7,7 @@ import XPBar from '../components/XPBar'
 import QuestCard from '../components/QuestCard'
 import GulagOverlay from '../components/GulagOverlay'
 import DevToolsPanel from '../components/DevToolsPanel'
+import SeasonHistory from '../components/SeasonHistory'
 
 interface DashboardProps {
   userId: number
@@ -161,6 +162,9 @@ export default function Dashboard({ userId }: DashboardProps) {
 
       {/* Dev tools */}
       <DevToolsPanel userId={userId} onWebhookSuccess={refetch} showToasts={showToasts} />
+
+      {/* Season history */}
+      <SeasonHistory userId={userId} />
     </div>
   )
 }
