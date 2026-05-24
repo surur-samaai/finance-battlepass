@@ -1,0 +1,75 @@
+import type { WishlistItem as WishlistItemType } from '../types'
+
+interface WishlistItemProps {
+  item: WishlistItemType
+  microTokens: number
+  standardTokens: number
+  onRedeem: (item: WishlistItemType) => void
+}
+
+export default function WishlistItem({
+  item,
+  microTokens,
+  standardTokens,
+  onRedeem,
+}: WishlistItemProps) {
+  const isAffordable =
+    item.token_type === 'MICRO'
+      ? microTokens >= item.token_cost
+      : standardTokens >= item.token_cost
+
+  const tokenBalance = item.token_type === 'MICRO' ? microTokens : standardTokens
+  const deficit = item.token_cost - tokenBalance
+  const tokenLabel = item.token_type === 'MICRO' ? 'Micro' : 'Standard'
+
+  if (item.is_purchased) {
+    return (
+      <div className="relative rounded-lg border border-white/5 bg-white/5 p-4 opacity-30">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="rotate-[-15deg] rounded border-2 border-green-400 px-3 py-1 text-lg font-black tracking-widest text-green-400 uppercase">
+            Unlocked
+          </span>
+        </div>
+        <p className="font-semibold text-white">{item.item_name}</p>
+        <p className="text-sm text-white/40">
+          R{item.price_zar} · {item.token_cost} {tokenLabel} Token
+          {item.token_cost !== 1 ? 's' : ''}
+        </p>
+      </div>
+    )
+  }
+
+  if (isAffordable) {
+    return (
+      <div className="rounded-lg border-2 border-accent bg-white/5 p-4 shadow-[0_0_16px_#4A90D940]">
+        <p className="font-semibold text-white">{item.item_name}</p>
+        <p className="text-sm text-white/50 mb-3">
+          R{item.price_zar} · {item.token_cost} {tokenLabel} Token
+          {item.token_cost !== 1 ? 's' : ''}
+        </p>
+        <button
+          onClick={() => onRedeem(item)}
+          className="w-full rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-accent/80 transition-colors"
+        >
+          Redeem
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/5 p-4 opacity-50">
+      <div className="flex items-start justify-between">
+        <p className="font-semibold text-white">{item.item_name}</p>
+        <span className="text-lg">🔒</span>
+      </div>
+      <p className="text-sm text-white/50 mb-3">
+        R{item.price_zar} · {item.token_cost} {tokenLabel} Token
+        {item.token_cost !== 1 ? 's' : ''}
+      </p>
+      <p className="text-xs text-red-400">
+        Need {deficit} more {tokenLabel} Token{deficit !== 1 ? 's' : ''}
+      </p>
+    </div>
+  )
+}
