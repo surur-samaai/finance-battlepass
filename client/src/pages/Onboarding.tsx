@@ -1,19 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { suggestWishlistTokenCost, formatSuggestedCost } from '../utils/wishlistPricing'
 
 type Step = 1 | 2 | 3
 
 interface FixedCostRow {
   name: string
   amount: string
-}
-
-function suggestTokenCost(priceZar: number): string {
-  if (priceZar < 50) return '1 Micro-Token'
-  if (priceZar < 150) return '1 Standard Token'
-  if (priceZar < 400) return '2 Standard Tokens'
-  if (priceZar <= 800) return '3 Standard Tokens'
-  return 'Set manually'
 }
 
 export default function Onboarding() {
@@ -24,10 +17,8 @@ export default function Onboarding() {
   const [wishlistName, setWishlistName] = useState('')
   const [wishlistPrice, setWishlistPrice] = useState('')
 
-  const suggestedCost =
-    wishlistPrice && !isNaN(parseFloat(wishlistPrice))
-      ? suggestTokenCost(parseFloat(wishlistPrice))
-      : null
+  const parsedPrice = wishlistPrice && !isNaN(parseFloat(wishlistPrice)) ? parseFloat(wishlistPrice) : null
+  const suggestedCost = parsedPrice !== null ? formatSuggestedCost(suggestWishlistTokenCost(parsedPrice)) : null
 
   const addFixedCostRow = () => {
     setFixedCosts((prev) => [...prev, { name: '', amount: '' }])

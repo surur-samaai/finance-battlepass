@@ -38,6 +38,17 @@ export interface ConfirmRedeemResponse {
   wishlist_tokens_standard: number;
 }
 
+export interface AddWishlistItemPayload {
+  item_name: string;
+  price_zar: number;
+  token_cost?: number;
+  token_type?: "MICRO" | "STANDARD";
+}
+
+export interface DeleteWishlistItemResponse {
+  success: true;
+}
+
 export interface QuestCompleteResponse {
   current_xp: number;
   level: number;

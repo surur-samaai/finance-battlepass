@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { WishlistItem as WishlistItemType } from '../types'
 
 interface WishlistItemProps {
@@ -6,6 +7,9 @@ interface WishlistItemProps {
   standardTokens: number
   onRedeem: (item: WishlistItemType) => void
   redeemError?: string
+  onDelete?: (itemId: number) => void
+  isDeleting?: boolean
+  deleteError?: string
 }
 
 export default function WishlistItem({
@@ -14,7 +18,12 @@ export default function WishlistItem({
   standardTokens,
   onRedeem,
   redeemError,
+  onDelete,
+  isDeleting = false,
+  deleteError,
 }: WishlistItemProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
   const isAffordable =
     item.token_type === 'MICRO'
       ? microTokens >= item.token_cost
@@ -41,6 +50,44 @@ export default function WishlistItem({
     )
   }
 
+  const deleteButton = onDelete !== undefined && (
+    <div className="mt-3">
+      {!showDeleteConfirm ? (
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          disabled={isDeleting}
+          className="text-xs text-white/30 hover:text-red-400 transition-colors disabled:opacity-50"
+        >
+          Remove
+        </button>
+      ) : (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-white/50">Remove this item?</span>
+          <button
+            onClick={() => {
+              setShowDeleteConfirm(false)
+              onDelete(item.id)
+            }}
+            disabled={isDeleting}
+            className="text-xs text-red-400 hover:text-red-300 font-semibold transition-colors disabled:opacity-50"
+          >
+            {isDeleting ? 'Removing…' : 'Confirm'}
+          </button>
+          <button
+            onClick={() => setShowDeleteConfirm(false)}
+            disabled={isDeleting}
+            className="text-xs text-white/40 hover:text-white transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+      {deleteError !== undefined && (
+        <p className="text-xs text-red-400 mt-1">{deleteError}</p>
+      )}
+    </div>
+  )
+
   if (isAffordable) {
     return (
       <div className="rounded-lg border-2 border-accent bg-white/5 p-4 shadow-[0_0_16px_#4A90D940]">
@@ -58,6 +105,7 @@ export default function WishlistItem({
         {redeemError !== undefined && (
           <p className="text-xs text-red-400 mt-2">{redeemError}</p>
         )}
+        {deleteButton}
       </div>
     )
   }
@@ -78,6 +126,7 @@ export default function WishlistItem({
       {redeemError !== undefined && (
         <p className="text-xs text-red-400 mt-2">{redeemError}</p>
       )}
+      {deleteButton}
     </div>
   )
 }

@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useWishlist } from '../hooks/useWishlist'
 import { useToast } from '../context/ToastContext'
-import { redeemItem, confirmRedeem } from '../api/wishlist'
+import { redeemItem, confirmRedeem, deleteWishlistItem } from '../api/wishlist'
 import { extractErrorMessage } from '../api/client'
 import type { WishlistItem as WishlistItemType } from '../types'
 import WishlistItem from '../components/WishlistItem'
 import RedemptionModal from '../components/RedemptionModal'
+import AddWishlistItemModal from '../components/AddWishlistItemModal'
 
 interface VaultProps {
   userId: number
@@ -19,6 +20,11 @@ export default function Vault({ userId }: VaultProps) {
   const [redeemErrors, setRedeemErrors] = useState<Record<number, string>>({})
   const [modalError, setModalError] = useState<string | null>(null)
   const [isConfirming, setIsConfirming] = useState(false)
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+
+  const [deleteErrors, setDeleteErrors] = useState<Record<number, string>>({})
+  const [deletingItemId, setDeletingItemId] = useState<number | null>(null)
 
   const handleRedeem = async (item: WishlistItemType) => {
     setRedeemErrors((prev) => {
@@ -51,6 +57,23 @@ export default function Vault({ userId }: VaultProps) {
     }
   }
 
+  const handleDelete = async (itemId: number) => {
+    setDeleteErrors((prev) => {
+      const next = { ...prev }
+      delete next[itemId]
+      return next
+    })
+    setDeletingItemId(itemId)
+    try {
+      await deleteWishlistItem(userId, itemId)
+      refetch()
+    } catch (err) {
+      setDeleteErrors((prev) => ({ ...prev, [itemId]: extractErrorMessage(err) }))
+    } finally {
+      setDeletingItemId(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -75,14 +98,22 @@ export default function Vault({ userId }: VaultProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white mb-1">Wishlist Vault</h1>
-        <p className="text-sm text-white/40">
-          Tokens available:{' '}
-          <span className="text-accent font-semibold">{microTokens} Micro</span>
-          {' · '}
-          <span className="text-accent font-semibold">{standardTokens} Standard</span>
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-1">Wishlist Vault</h1>
+          <p className="text-sm text-white/40">
+            Tokens available:{' '}
+            <span className="text-accent font-semibold">{microTokens} Micro</span>
+            {' · '}
+            <span className="text-accent font-semibold">{standardTokens} Standard</span>
+          </p>
+        </div>
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent/80 transition-colors"
+        >
+          + Add Item
+        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -94,6 +125,9 @@ export default function Vault({ userId }: VaultProps) {
             standardTokens={standardTokens}
             onRedeem={(i) => void handleRedeem(i)}
             redeemError={redeemErrors[item.id]}
+            onDelete={(id) => void handleDelete(id)}
+            isDeleting={deletingItemId === item.id}
+            deleteError={deleteErrors[item.id]}
           />
         ))}
         {items.length === 0 && (
@@ -108,6 +142,17 @@ export default function Vault({ userId }: VaultProps) {
           onConfirm={() => void handleConfirm()}
           error={modalError ?? undefined}
           isConfirming={isConfirming}
+        />
+      )}
+
+      {isAddModalOpen && (
+        <AddWishlistItemModal
+          userId={userId}
+          onSuccess={() => {
+            setIsAddModalOpen(false)
+            refetch()
+          }}
+          onClose={() => setIsAddModalOpen(false)}
         />
       )}
     </div>
