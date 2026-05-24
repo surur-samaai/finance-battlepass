@@ -16,6 +16,11 @@ router.post("/mock-bank", async (req, res) => {
     return;
   }
 
+  if (payload.user_id !== req.user!.id) {
+    res.status(403).json({ error: "Forbidden." });
+    return;
+  }
+
   try {
     const result = await processTransaction(payload, payload.user_id);
     res.json(result);

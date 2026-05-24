@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchWishlist } from "../api/wishlist";
-import { HARDCODED_USER_ID } from "../constants/userId";
 import type { WishlistItem } from "../types";
 
 interface UseWishlistResult {
@@ -12,7 +11,7 @@ interface UseWishlistResult {
   refetch: () => void;
 }
 
-export function useWishlist(): UseWishlistResult {
+export function useWishlist(userId: number): UseWishlistResult {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [microTokens, setMicroTokens] = useState(0);
   const [standardTokens, setStandardTokens] = useState(0);
@@ -23,7 +22,7 @@ export function useWishlist(): UseWishlistResult {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchWishlist(HARDCODED_USER_ID);
+      const data = await fetchWishlist(userId);
       setItems(data.items);
       setMicroTokens(data.wishlist_tokens_micro);
       setStandardTokens(data.wishlist_tokens_standard);
@@ -32,7 +31,7 @@ export function useWishlist(): UseWishlistResult {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     void load();

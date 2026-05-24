@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { fireMockBankWebhook } from '../api/webhooks'
 import { extractErrorMessage } from '../api/client'
-import { HARDCODED_USER_ID } from '../constants/userId'
 import type { GameEngineResult } from '../api/types'
 
 interface DevToolsPanelProps {
+  userId: number
   onWebhookSuccess: () => void
   showToasts: (messages: string[]) => void
 }
@@ -15,7 +15,7 @@ interface WebhookFormState {
   system_category: 'FIXED_BILL' | 'DISCRETIONARY'
 }
 
-export default function DevToolsPanel({ onWebhookSuccess, showToasts }: DevToolsPanelProps) {
+export default function DevToolsPanel({ userId, onWebhookSuccess, showToasts }: DevToolsPanelProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [form, setForm] = useState<WebhookFormState>({
     amount: '',
@@ -34,8 +34,7 @@ export default function DevToolsPanel({ onWebhookSuccess, showToasts }: DevTools
 
     try {
       const data = await fireMockBankWebhook({
-        // TODO: replace with session user ID after Phase 5
-        user_id: HARDCODED_USER_ID,
+        user_id: userId,
         amount: parseFloat(form.amount),
         merchant: form.merchant,
         system_category: form.system_category,

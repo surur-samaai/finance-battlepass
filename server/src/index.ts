@@ -2,12 +2,19 @@ import path from "path";
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import passport from "passport";
 
 // 1. Load environment variables FIRST
 dotenv.config({ path: path.join(__dirname, "../../server/.env") });
 
 // 2. Initialize DB connection AFTER env variables are loaded
 require("./db/index");
+const { pool } = require("./db/index") as { pool: import("pg").Pool };
+
+// 3. Register Passport strategies
+import "./config/passport";
 
 import { requireAuth } from "./middleware/requireAuth";
 import authRouter from "./routes/auth";
@@ -36,6 +43,20 @@ app.use(
   })
 );
 app.use(express.json());
+
+const PgSession = connectPgSimple(session);
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET!,
+    resave: false,
+    saveUninitialized: false,
+    store: new PgSession({ pool, tableName: "session" }),
+    cookie: { secure: process.env.NODE_ENV === "production" },
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });

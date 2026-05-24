@@ -9,12 +9,14 @@ import {
 const router = Router();
 
 router.get("/:id/wishlist", async (req, res) => {
-  const userId = parseInt(req.params["id"], 10);
+  const routeUserId = parseInt(req.params["id"], 10);
 
-  if (isNaN(userId)) {
-    res.status(400).json({ error: "id must be an integer." });
+  if (isNaN(routeUserId) || routeUserId !== req.user!.id) {
+    res.status(403).json({ error: "Forbidden." });
     return;
   }
+
+  const userId = req.user!.id;
 
   try {
     const result = await getWishlist(userId);
@@ -32,13 +34,15 @@ router.get("/:id/wishlist", async (req, res) => {
 });
 
 router.post("/:id/wishlist/:itemId/redeem", async (req, res) => {
-  const userId = parseInt(req.params["id"], 10);
+  const routeUserId = parseInt(req.params["id"], 10);
   const itemId = parseInt(req.params["itemId"], 10);
 
-  if (isNaN(userId) || isNaN(itemId)) {
-    res.status(400).json({ error: "id and itemId must be integers." });
+  if (isNaN(routeUserId) || routeUserId !== req.user!.id || isNaN(itemId)) {
+    res.status(403).json({ error: "Forbidden." });
     return;
   }
+
+  const userId = req.user!.id;
 
   try {
     const result = await validateRedeem(userId, itemId);
@@ -54,13 +58,15 @@ router.post("/:id/wishlist/:itemId/redeem", async (req, res) => {
 });
 
 router.post("/:id/wishlist/:itemId/confirm-redeem", async (req, res) => {
-  const userId = parseInt(req.params["id"], 10);
+  const routeUserId = parseInt(req.params["id"], 10);
   const itemId = parseInt(req.params["itemId"], 10);
 
-  if (isNaN(userId) || isNaN(itemId)) {
-    res.status(400).json({ error: "id and itemId must be integers." });
+  if (isNaN(routeUserId) || routeUserId !== req.user!.id || isNaN(itemId)) {
+    res.status(403).json({ error: "Forbidden." });
     return;
   }
+
+  const userId = req.user!.id;
 
   try {
     const result = await confirmRedeem(userId, itemId);

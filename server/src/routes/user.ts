@@ -4,12 +4,14 @@ import { getDashboard } from "../services/dashboardService";
 const router = Router();
 
 router.get("/:id/dashboard", async (req, res) => {
-  const userId = parseInt(req.params["id"], 10);
+  const routeUserId = parseInt(req.params["id"], 10);
 
-  if (isNaN(userId)) {
-    res.status(400).json({ error: "id must be an integer." });
+  if (isNaN(routeUserId) || routeUserId !== req.user!.id) {
+    res.status(403).json({ error: "Forbidden." });
     return;
   }
+
+  const userId = req.user!.id;
 
   try {
     const result = await getDashboard(userId);

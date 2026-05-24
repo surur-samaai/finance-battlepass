@@ -1,19 +1,22 @@
 import { Request, Response, NextFunction } from "express";
+import { getUserById } from "../services/authService";
 
-export function requireAuth(
+export async function requireAuth(
   req: Request,
   res: Response,
   next: NextFunction
-): void {
-  if (process.env.SKIP_AUTH === "true") {
-    next();
+): Promise<void> {
+  if (req.session.userId === undefined) {
+    res.status(401).json({ error: "Unauthorized" });
     return;
   }
 
-  if (req.session?.userId !== undefined) {
-    next();
+  const user = await getUserById(req.session.userId);
+  if (user === null) {
+    res.status(401).json({ error: "Unauthorized" });
     return;
   }
 
-  res.status(401).json({ error: "Unauthorized" });
+  req.user = user;
+  next();
 }

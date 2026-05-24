@@ -3,13 +3,16 @@ import { useWishlist } from '../hooks/useWishlist'
 import { useToast } from '../context/ToastContext'
 import { redeemItem, confirmRedeem } from '../api/wishlist'
 import { extractErrorMessage } from '../api/client'
-import { HARDCODED_USER_ID } from '../constants/userId'
 import type { WishlistItem as WishlistItemType } from '../types'
 import WishlistItem from '../components/WishlistItem'
 import RedemptionModal from '../components/RedemptionModal'
 
-export default function Vault() {
-  const { items, microTokens, standardTokens, loading, error, refetch } = useWishlist()
+interface VaultProps {
+  userId: number
+}
+
+export default function Vault({ userId }: VaultProps) {
+  const { items, microTokens, standardTokens, loading, error, refetch } = useWishlist(userId)
   const { showToasts } = useToast()
 
   const [selectedItem, setSelectedItem] = useState<WishlistItemType | null>(null)
@@ -24,7 +27,7 @@ export default function Vault() {
       return next
     })
     try {
-      await redeemItem(HARDCODED_USER_ID, item.id)
+      await redeemItem(userId, item.id)
       setSelectedItem(item)
       setModalError(null)
     } catch (err) {
@@ -37,7 +40,7 @@ export default function Vault() {
     setIsConfirming(true)
     setModalError(null)
     try {
-      const result = await confirmRedeem(HARDCODED_USER_ID, selectedItem.id)
+      const result = await confirmRedeem(userId, selectedItem.id)
       showToasts(result.toastMessages)
       setSelectedItem(null)
       refetch()

@@ -3,11 +3,14 @@ import { useDashboard } from '../hooks/useDashboard'
 import { useToast } from '../context/ToastContext'
 import { completeQuest } from '../api/quests'
 import { extractErrorMessage } from '../api/client'
-import { HARDCODED_USER_ID } from '../constants/userId'
 import XPBar from '../components/XPBar'
 import QuestCard from '../components/QuestCard'
 import GulagOverlay from '../components/GulagOverlay'
 import DevToolsPanel from '../components/DevToolsPanel'
+
+interface DashboardProps {
+  userId: number
+}
 
 const stateBadge: Record<'ACTIVE' | 'GULAG' | 'REDEMPTION', string> = {
   ACTIVE: 'bg-green-600 text-white',
@@ -15,15 +18,15 @@ const stateBadge: Record<'ACTIVE' | 'GULAG' | 'REDEMPTION', string> = {
   REDEMPTION: 'bg-amber-500 text-white',
 }
 
-export default function Dashboard() {
-  const { user, quests, loading, error, refetch } = useDashboard()
+export default function Dashboard({ userId }: DashboardProps) {
+  const { user, quests, loading, error, refetch } = useDashboard(userId)
   const { showToasts } = useToast()
   const [completingQuestId, setCompletingQuestId] = useState<number | null>(null)
 
   const handleCompleteQuest = async (questId: number) => {
     setCompletingQuestId(questId)
     try {
-      const result = await completeQuest(HARDCODED_USER_ID, questId)
+      const result = await completeQuest(userId, questId)
       showToasts(result.toastMessages)
       refetch()
     } catch (err) {
@@ -155,7 +158,7 @@ export default function Dashboard() {
       </div>
 
       {/* Dev tools */}
-      <DevToolsPanel onWebhookSuccess={refetch} showToasts={showToasts} />
+      <DevToolsPanel userId={userId} onWebhookSuccess={refetch} showToasts={showToasts} />
     </div>
   )
 }

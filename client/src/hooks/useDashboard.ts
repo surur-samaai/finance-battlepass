@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchDashboard } from "../api/user";
-import { HARDCODED_USER_ID } from "../constants/userId";
 import type { User, Quest } from "../types";
 
 interface UseDashboardResult {
@@ -11,7 +10,7 @@ interface UseDashboardResult {
   refetch: () => void;
 }
 
-export function useDashboard(): UseDashboardResult {
+export function useDashboard(userId: number): UseDashboardResult {
   const [user, setUser] = useState<User | null>(null);
   const [quests, setQuests] = useState<Quest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +20,7 @@ export function useDashboard(): UseDashboardResult {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchDashboard(HARDCODED_USER_ID);
+      const data = await fetchDashboard(userId);
       setUser(data.user);
       setQuests(data.quests);
     } catch (err) {
@@ -29,7 +28,7 @@ export function useDashboard(): UseDashboardResult {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     void load();

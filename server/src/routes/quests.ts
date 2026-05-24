@@ -6,13 +6,15 @@ import type { UserRow, QuestRow } from "../types/gameLogic";
 const router = Router();
 
 router.post("/:id/quests/:questId/complete", async (req, res) => {
-  const userId = parseInt(req.params["id"], 10);
+  const routeUserId = parseInt(req.params["id"], 10);
   const questId = parseInt(req.params["questId"], 10);
 
-  if (isNaN(userId) || isNaN(questId)) {
-    res.status(400).json({ error: "id and questId must be integers." });
+  if (isNaN(routeUserId) || routeUserId !== req.user!.id || isNaN(questId)) {
+    res.status(403).json({ error: "Forbidden." });
     return;
   }
+
+  const userId = req.user!.id;
 
   const client = await pool.connect();
   try {
