@@ -1,36 +1,63 @@
-import type { User, Quest } from '../types'
+import { useState } from 'react'
+import { useDashboard } from '../hooks/useDashboard'
+import { useToast } from '../context/ToastContext'
+import { completeQuest } from '../api/quests'
+import { extractErrorMessage } from '../api/client'
+import { HARDCODED_USER_ID } from '../constants/userId'
 import XPBar from '../components/XPBar'
 import QuestCard from '../components/QuestCard'
 import GulagOverlay from '../components/GulagOverlay'
 import DevToolsPanel from '../components/DevToolsPanel'
 
-const fakeUser: User = {
-  username: 'Player One',
-  level: 4,
-  current_xp: 520,
-  xp_to_next_level: 700,
-  playable_balance: 3240.00,
-  state: 'GULAG', // change to 'GULAG' or 'REDEMPTION' to test other states
-  wishlist_tokens_micro: 1,
-  wishlist_tokens_standard: 0,
-}
-
-const fakeQuests: Quest[] = [
-  { id: 1, title: 'Zero Spend Day', xp_reward: 25, quest_type: 'DAILY', status: 'ACTIVE' },
-  { id: 2, title: 'Meal Prep', xp_reward: 20, quest_type: 'DAILY', status: 'ACTIVE' },
-  { id: 3, title: 'Weekly Streak', xp_reward: 100, quest_type: 'WEEKLY', status: 'ACTIVE' },
-]
-
-const stateBadge: Record<User['state'], string> = {
+const stateBadge: Record<'ACTIVE' | 'GULAG' | 'REDEMPTION', string> = {
   ACTIVE: 'bg-green-600 text-white',
   GULAG: 'bg-red-600 text-white animate-pulse',
   REDEMPTION: 'bg-amber-500 text-white',
 }
 
 export default function Dashboard() {
-  const user = fakeUser
-  const quests = fakeQuests
+  const { user, quests, loading, error, refetch } = useDashboard()
+  const { showToasts } = useToast()
+  const [completingQuestId, setCompletingQuestId] = useState<number | null>(null)
+
+  const handleCompleteQuest = async (questId: number) => {
+    setCompletingQuestId(questId)
+    try {
+      const result = await completeQuest(HARDCODED_USER_ID, questId)
+      showToasts(result.toastMessages)
+      refetch()
+    } catch (err) {
+      showToasts([extractErrorMessage(err)])
+    } finally {
+      setCompletingQuestId(null)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-white/40 text-sm">Loading dashboard…</p>
+      </div>
+    )
+  }
+
+  if (error !== null || user === null) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <p className="text-red-400 text-sm">{error ?? 'Failed to load dashboard.'}</p>
+        <button
+          onClick={refetch}
+          className="rounded-md bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    )
+  }
+
   const isGulag = user.state === 'GULAG'
+  const gulagQuest = quests.find((q) => q.quest_type === 'GULAG_REDEMPTION')
+  const gulagStreak = gulagQuest?.streak_count ?? 0
 
   return (
     <div className="space-y-8">
@@ -87,7 +114,7 @@ export default function Dashboard() {
 
         {/* XP bar or Gulag overlay */}
         {isGulag ? (
-          <GulagOverlay streakCount={1} />
+          <GulagOverlay streakCount={gulagStreak} />
         ) : (
           <div>
             <p className="text-xs text-white/40 uppercase tracking-wider mb-2">
@@ -114,13 +141,21 @@ export default function Dashboard() {
         </h2>
         <div className="space-y-2">
           {quests.map((quest) => (
-            <QuestCard key={quest.id} quest={quest} />
+            <QuestCard
+              key={quest.id}
+              quest={quest}
+              onComplete={handleCompleteQuest}
+              isCompleting={completingQuestId === quest.id}
+            />
           ))}
+          {quests.length === 0 && (
+            <p className="text-sm text-white/30">No active quests.</p>
+          )}
         </div>
       </div>
 
       {/* Dev tools */}
-      <DevToolsPanel />
+      <DevToolsPanel onWebhookSuccess={refetch} showToasts={showToasts} />
     </div>
   )
 }

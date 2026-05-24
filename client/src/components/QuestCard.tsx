@@ -2,6 +2,8 @@ import type { Quest } from '../types'
 
 interface QuestCardProps {
   quest: Quest
+  onComplete: (questId: number) => Promise<void>
+  isCompleting?: boolean
 }
 
 const questTypePill: Record<Quest['quest_type'], string> = {
@@ -16,7 +18,10 @@ const questTypeLabel: Record<Quest['quest_type'], string> = {
   GULAG_REDEMPTION: 'Gulag',
 }
 
-export default function QuestCard({ quest }: QuestCardProps) {
+export default function QuestCard({ quest, onComplete, isCompleting = false }: QuestCardProps) {
+  const isManuallyCompletable =
+    quest.quest_type !== 'GULAG_REDEMPTION' && quest.status === 'ACTIVE'
+
   return (
     <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3">
       <div className="flex flex-col gap-1">
@@ -30,14 +35,22 @@ export default function QuestCard({ quest }: QuestCardProps) {
             {questTypeLabel[quest.quest_type]}
           </span>
           <span className="text-xs text-accent font-semibold">+{quest.xp_reward} XP</span>
+          {quest.streak_count !== undefined && quest.streak_count > 0 && (
+            <span className="text-xs text-white/40">
+              {quest.streak_count}/3 days
+            </span>
+          )}
         </div>
       </div>
-      <button
-        onClick={() => {}}
-        className="rounded-md bg-accent/20 px-3 py-1.5 text-sm font-medium text-accent hover:bg-accent/30 transition-colors"
-      >
-        Complete
-      </button>
+      {isManuallyCompletable && (
+        <button
+          onClick={() => void onComplete(quest.id)}
+          disabled={isCompleting}
+          className="rounded-md bg-accent/20 px-3 py-1.5 text-sm font-medium text-accent hover:bg-accent/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isCompleting ? '…' : 'Complete'}
+        </button>
+      )}
     </div>
   )
 }

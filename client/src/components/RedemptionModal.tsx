@@ -4,9 +4,11 @@ interface RedemptionModalProps {
   item: WishlistItem
   onClose: () => void
   onConfirm: () => void
+  error?: string
+  isConfirming?: boolean
 }
 
-export default function RedemptionModal({ item, onClose, onConfirm }: RedemptionModalProps) {
+export default function RedemptionModal({ item, onClose, onConfirm, error, isConfirming = false }: RedemptionModalProps) {
   const tokenLabel = item.token_type === 'MICRO' ? 'Micro' : 'Standard'
 
   return (
@@ -29,18 +31,24 @@ export default function RedemptionModal({ item, onClose, onConfirm }: Redemption
           </p>
         </div>
 
+        {error !== undefined && (
+          <p className="text-xs text-red-400 mb-4">{error}</p>
+        )}
+
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/10 transition-colors"
+            disabled={isConfirming}
+            className="flex-1 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/10 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent/80 transition-colors"
+            disabled={isConfirming}
+            className="flex-1 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Confirm
+            {isConfirming ? 'Confirming…' : 'Confirm'}
           </button>
         </div>
       </div>

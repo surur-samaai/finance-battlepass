@@ -5,6 +5,7 @@ interface WishlistItemProps {
   microTokens: number
   standardTokens: number
   onRedeem: (item: WishlistItemType) => void
+  redeemError?: string
 }
 
 export default function WishlistItem({
@@ -12,6 +13,7 @@ export default function WishlistItem({
   microTokens,
   standardTokens,
   onRedeem,
+  redeemError,
 }: WishlistItemProps) {
   const isAffordable =
     item.token_type === 'MICRO'
@@ -53,6 +55,9 @@ export default function WishlistItem({
         >
           Redeem
         </button>
+        {redeemError !== undefined && (
+          <p className="text-xs text-red-400 mt-2">{redeemError}</p>
+        )}
       </div>
     )
   }
@@ -70,6 +75,9 @@ export default function WishlistItem({
       <p className="text-xs text-red-400">
         Need {deficit} more {tokenLabel} Token{deficit !== 1 ? 's' : ''}
       </p>
+      {redeemError !== undefined && (
+        <p className="text-xs text-red-400 mt-2">{redeemError}</p>
+      )}
     </div>
   )
 }

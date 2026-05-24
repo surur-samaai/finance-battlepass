@@ -1,23 +1,39 @@
-import type { User, Quest } from '../types'
+import { useState, useEffect, useCallback } from "react";
+import { fetchDashboard } from "../api/user";
+import { HARDCODED_USER_ID } from "../constants/userId";
+import type { User, Quest } from "../types";
 
-// Phase 3 stub — no API calls. Will be replaced with real fetch in Phase 4.
-const stubUser: User = {
-  username: 'Player One',
-  level: 4,
-  current_xp: 520,
-  xp_to_next_level: 700,
-  playable_balance: 3240.00,
-  state: 'ACTIVE',
-  wishlist_tokens_micro: 1,
-  wishlist_tokens_standard: 0,
+interface UseDashboardResult {
+  user: User | null;
+  quests: Quest[];
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
 }
 
-const stubQuests: Quest[] = [
-  { id: 1, title: 'Zero Spend Day', xp_reward: 25, quest_type: 'DAILY', status: 'ACTIVE' },
-  { id: 2, title: 'Meal Prep', xp_reward: 20, quest_type: 'DAILY', status: 'ACTIVE' },
-  { id: 3, title: 'Weekly Streak', xp_reward: 100, quest_type: 'WEEKLY', status: 'ACTIVE' },
-]
+export function useDashboard(): UseDashboardResult {
+  const [user, setUser] = useState<User | null>(null);
+  const [quests, setQuests] = useState<Quest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export function useDashboard(): { user: User; quests: Quest[] } {
-  return { user: stubUser, quests: stubQuests }
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchDashboard(HARDCODED_USER_ID);
+      setUser(data.user);
+      setQuests(data.quests);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load dashboard.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  return { user, quests, loading, error, refetch: load };
 }

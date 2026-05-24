@@ -4,31 +4,31 @@ overview: "Implement the four remaining backend stub handlers (dashboard + wishl
 todos:
   - id: backend-dashboard
     content: Create dashboardService.ts and implement GET /api/user/:id/dashboard in user.ts
-    status: pending
+    status: completed
   - id: backend-wishlist
     content: Create wishlistService.ts and implement GET wishlist + POST redeem + POST confirm-redeem in wishlist.ts
-    status: pending
+    status: completed
   - id: backend-cors
     content: Add cors middleware to server/index.ts for Vite dev origin
-    status: pending
+    status: completed
   - id: frontend-api
     content: Install axios; create api/client.ts, api/types.ts, and resource modules (user, wishlist, quests, webhooks)
-    status: pending
+    status: completed
   - id: frontend-toast
     content: Create Toast.tsx + ToastContext; mount in App.tsx
-    status: pending
+    status: completed
   - id: frontend-hooks
     content: Rewrite useDashboard.ts; create useWishlist.ts with loading/error/refetch
-    status: pending
+    status: completed
   - id: wire-dashboard
     content: Wire Dashboard.tsx, QuestCard.tsx, DevToolsPanel.tsx to real API + toasts + refetch
-    status: pending
+    status: completed
   - id: wire-vault
     content: Wire Vault.tsx, WishlistItem.tsx, RedemptionModal.tsx for 2-step redemption flow
-    status: pending
+    status: completed
   - id: verify-exit
     content: Manual verification against Phase 4 exit criteria checklist
-    status: pending
+    status: completed
 isProject: false
 ---
 
