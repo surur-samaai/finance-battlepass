@@ -9,3 +9,41 @@
     font-family: 'Inter', sans-serif;
   }
 }
+
+@keyframes toast-in {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@layer utilities {
+  .animate-toast-in {
+    animation: toast-in 200ms ease-out forwards;
+  }
+
+  .animate-toast-out {
+    animation: toast-out 150ms ease-in forwards;
+  }
+
+  .wishlist-glow {
+    box-shadow: 0 0 12px rgba(74, 144, 217, 0.4);
+  }
+
+  .wishlist-glow:hover {
+    box-shadow: 0 0 12px rgba(74, 144, 217, 0.7);
+  }
+}

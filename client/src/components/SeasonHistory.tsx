@@ -65,7 +65,9 @@ export default function SeasonHistory({ userId }: SeasonHistoryProps) {
           )}
 
           {!loading && error === null && seasons.length === 0 && hasLoaded && (
-            <p className="text-sm text-white/30">No archived seasons yet.</p>
+            <p className="text-sm text-white/30">
+              No previous seasons. Complete your first month to see stats here.
+            </p>
           )}
 
           {!loading && error === null && seasons.length > 0 && (

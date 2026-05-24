@@ -90,7 +90,7 @@ export default function WishlistItem({
 
   if (isAffordable) {
     return (
-      <div className="rounded-lg border-2 border-accent bg-white/5 p-4 shadow-[0_0_16px_#4A90D940]">
+      <div className="rounded-lg border-2 border-accent bg-white/5 p-4 wishlist-glow transition-shadow">
         <p className="font-semibold text-white">{item.item_name}</p>
         <p className="text-sm text-white/50 mb-3">
           R{item.price_zar} · {item.token_cost} {tokenLabel} Token

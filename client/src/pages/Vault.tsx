@@ -116,24 +116,35 @@ export default function Vault({ userId }: VaultProps) {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {items.map((item) => (
-          <WishlistItem
-            key={item.id}
-            item={item}
-            microTokens={microTokens}
-            standardTokens={standardTokens}
-            onRedeem={(i) => void handleRedeem(i)}
-            redeemError={redeemErrors[item.id]}
-            onDelete={(id) => void handleDelete(id)}
-            isDeleting={deletingItemId === item.id}
-            deleteError={deleteErrors[item.id]}
-          />
-        ))}
-        {items.length === 0 && (
-          <p className="text-sm text-white/30 col-span-2">No wishlist items yet.</p>
-        )}
-      </div>
+      {items.length === 0 ? (
+        <div className="py-12 text-center space-y-4 rounded-xl border border-white/10 bg-white/5">
+          <p className="text-sm text-white/50 max-w-md mx-auto">
+            Your Vault is empty. Add items to start earning towards them.
+          </p>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent/80 transition-colors"
+          >
+            Add Item
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.map((item) => (
+            <WishlistItem
+              key={item.id}
+              item={item}
+              microTokens={microTokens}
+              standardTokens={standardTokens}
+              onRedeem={(i) => void handleRedeem(i)}
+              redeemError={redeemErrors[item.id]}
+              onDelete={(id) => void handleDelete(id)}
+              isDeleting={deletingItemId === item.id}
+              deleteError={deleteErrors[item.id]}
+            />
+          ))}
+        </div>
+      )}
 
       {selectedItem !== null && (
         <RedemptionModal

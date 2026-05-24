@@ -1,3 +1,5 @@
+import { useState, useEffect, useRef } from 'react'
+
 interface XPBarProps {
   currentXP: number
   xpToNext: number
@@ -11,7 +13,18 @@ export default function XPBar({
   isGulag = false,
   lockedIcon = 'padlock',
 }: XPBarProps) {
-  const percent = Math.min((currentXP / xpToNext) * 100, 100)
+  const targetPercent = Math.min((currentXP / xpToNext) * 100, 100)
+  const [displayWidth, setDisplayWidth] = useState(targetPercent)
+  const isFirstRender = useRef(true)
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      setDisplayWidth(targetPercent)
+      return
+    }
+    setDisplayWidth(targetPercent)
+  }, [currentXP, xpToNext, targetPercent])
 
   return (
     <div className="w-full">
@@ -25,8 +38,11 @@ export default function XPBar({
         }`}
       >
         <div
-          className="h-full rounded-full bg-accent transition-all duration-500"
-          style={{ width: `${percent}%` }}
+          className="h-full rounded-full bg-accent"
+          style={{
+            width: `${displayWidth}%`,
+            transition: 'width 600ms ease-out',
+          }}
         />
         {isGulag && (
           <div className="absolute inset-0 flex items-center justify-center">

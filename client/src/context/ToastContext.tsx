@@ -30,12 +30,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       }));
 
       setToasts((prev) => [...prev, ...newItems]);
-
-      newItems.forEach((item) => {
-        setTimeout(() => dismiss(item.id), 4000);
-      });
     },
-    [dismiss]
+    []
   );
 
   return (

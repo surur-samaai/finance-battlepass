@@ -26,6 +26,12 @@ import adminRouter from "./routes/admin";
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
+const isProduction = process.env.NODE_ENV === "production";
+const clientUrl = process.env.CLIENT_URL ?? "http://localhost:5173";
+
+if (isProduction) {
+  app.set("trust proxy", 1);
+}
 
 // Prevent Express from issuing 304 Not Modified on API responses — axios rejects non-2xx statuses.
 app.set("etag", false);
@@ -33,7 +39,11 @@ app.set("etag", false);
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (origin === undefined || /^http:\/\/localhost:\d+$/.test(origin)) {
+      if (origin === undefined) {
+        callback(null, true);
+        return;
+      }
+      if (origin === clientUrl || /^http:\/\/localhost:\d+$/.test(origin)) {
         callback(null, true);
         return;
       }
@@ -52,7 +62,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: new PgSession({ pool, tableName: "session" }),
-    cookie: { secure: process.env.NODE_ENV === "production" },
+    cookie: isProduction
+      ? { secure: true, sameSite: "none" }
+      : { secure: false, sameSite: "lax" },
   })
 );
 app.use(passport.initialize());

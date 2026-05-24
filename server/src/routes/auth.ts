@@ -16,13 +16,13 @@ router.get(
   (req, res) => {
     const user = req.user as AuthUser;
     req.session.userId = user.id;
-    res.redirect("http://localhost:5173");
+    res.redirect(process.env.CLIENT_URL ?? "http://localhost:5173");
   }
 );
 
 router.get("/logout", (req, res) => {
   req.session.destroy(() => {
-    res.redirect("http://localhost:5173");
+    res.redirect(process.env.CLIENT_URL ?? "http://localhost:5173");
   });
 });
 
