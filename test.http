@@ -1,0 +1,11 @@
+POST http://localhost:3000/api/webhooks/mock-bank
+Content-Type: application/json
+
+{
+  "transaction_id": "mock_tx_002",
+  "userId": 1,
+  "user_id": 1,
+  "amount": 250.00,
+  "merchant": "Uber Eats",
+  "system_category": "DISCRETIONARY"
+}

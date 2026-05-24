@@ -157,3 +157,13 @@ export const USER_STATES: readonly UserState[] = [
   "GULAG",
   "REDEMPTION",
 ] as const;
+
+/** Canonical quest titles used for quest matching and DB inserts. */
+export const QUEST_TITLES = {
+  ZERO_SPEND_DAY: "Zero Spend Day",
+  UNDER_BUDGET_DAY: "Under Budget Day",
+  MEAL_PREP: "Meal Prep",
+  WEEKLY_STREAK: "Weekly Streak",
+  WEEKLY_UNDER_BUDGET: "Weekly Under Budget",
+  GULAG_REDEMPTION: "Gulag Redemption",
+} as const;

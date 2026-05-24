@@ -1,10 +1,32 @@
 import { Router } from "express";
-import { sendStub } from "../utils/stubResponse";
+import { processTransaction, validatePayload, ValidationError } from "../services/gameLogicEngine";
 
 const router = Router();
 
-router.post("/mock-bank", (_req, res) => {
-  sendStub(res, "POST /api/webhooks/mock-bank");
+router.post("/mock-bank", async (req, res) => {
+  let payload;
+  try {
+    payload = validatePayload(req.body);
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.status(400).json({ error: "Invalid payload." });
+    return;
+  }
+
+  try {
+    const result = await processTransaction(payload, payload.user_id);
+    res.json(result);
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      res.status(400).json({ error: (err as Error).message });
+      return;
+    }
+    console.error("Game engine error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
 });
 
 export default router;
