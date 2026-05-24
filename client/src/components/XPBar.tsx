@@ -2,9 +2,15 @@ interface XPBarProps {
   currentXP: number
   xpToNext: number
   isGulag?: boolean
+  lockedIcon?: 'padlock' | 'hourglass'
 }
 
-export default function XPBar({ currentXP, xpToNext, isGulag = false }: XPBarProps) {
+export default function XPBar({
+  currentXP,
+  xpToNext,
+  isGulag = false,
+  lockedIcon = 'padlock',
+}: XPBarProps) {
   const percent = Math.min((currentXP / xpToNext) * 100, 100)
 
   return (
@@ -24,7 +30,9 @@ export default function XPBar({ currentXP, xpToNext, isGulag = false }: XPBarPro
         />
         {isGulag && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-xs text-white/70">🔒</span>
+            <span className="text-xs text-white/70">
+              {lockedIcon === 'hourglass' ? '⏳' : '🔒'}
+            </span>
           </div>
         )}
       </div>

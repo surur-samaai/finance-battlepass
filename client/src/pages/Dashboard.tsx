@@ -58,7 +58,8 @@ export default function Dashboard({ userId }: DashboardProps) {
     )
   }
 
-  const isGulag = user.state === 'GULAG'
+  const isBattlePassLocked =
+    user.state === 'GULAG' || user.state === 'REDEMPTION'
   const gulagQuest = quests.find((q) => q.quest_type === 'GULAG_REDEMPTION')
   const gulagStreak = gulagQuest?.streak_count ?? 0
 
@@ -116,8 +117,14 @@ export default function Dashboard({ userId }: DashboardProps) {
         </div>
 
         {/* XP bar or Gulag overlay */}
-        {isGulag ? (
-          <GulagOverlay streakCount={gulagStreak} />
+        {isBattlePassLocked ? (
+          <GulagOverlay
+            userState={user.state === 'GULAG' ? 'GULAG' : 'REDEMPTION'}
+            streakCount={gulagStreak}
+            currentXP={user.current_xp}
+            xpToNext={user.xp_to_next_level}
+            questTitle={gulagQuest?.title}
+          />
         ) : (
           <div>
             <p className="text-xs text-white/40 uppercase tracking-wider mb-2">
@@ -128,11 +135,6 @@ export default function Dashboard({ userId }: DashboardProps) {
               xpToNext={user.xp_to_next_level}
               isGulag={false}
             />
-            {user.state === 'REDEMPTION' && (
-              <p className="mt-2 text-xs text-amber-400 font-medium">
-                Redemption in progress — XP accumulation paused.
-              </p>
-            )}
           </div>
         )}
       </div>

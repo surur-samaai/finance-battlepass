@@ -36,4 +36,6 @@ export interface QuestRow {
   quest_type: QuestType;
   status: "ACTIVE" | "COMPLETE" | "FAILED";
   streak_count: number;
+  last_streak_date: string | null;
+  created_at: Date | string;
 }

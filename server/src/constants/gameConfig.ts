@@ -112,6 +112,15 @@ export const QUEST_XP_VALUES: readonly QuestXpConfig[] = [
 /** Gulag redemption streak requirement (Section 4.3 / 5). */
 export const GULAG_REDEMPTION_STREAK_DAYS = 3;
 
+/** PRD Section 10 — Gulag day progress toast (exact wording). */
+export function gulagProgressToast(streakCount: number): string {
+  const remaining = GULAG_REDEMPTION_STREAK_DAYS - streakCount;
+  if (remaining === 1) {
+    return `Day ${streakCount} of 3 complete. One more.`;
+  }
+  return `Day ${streakCount} of 3 complete. ${remaining} more.`;
+}
+
 /** Wishlist token pricing tiers in ZAR (Section 4.4). */
 export const WISHLIST_PRICING_TIERS: readonly WishlistPricingTier[] = [
   {

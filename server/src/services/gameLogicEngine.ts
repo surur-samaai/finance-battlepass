@@ -6,6 +6,7 @@ import {
 } from "../constants/gameConfig";
 import type { BankWebhookPayload, GameEngineResult, UserRow, QuestRow } from "../types/gameLogic";
 import { applyXpAndLevelUp } from "./levelUp";
+import { tryAdvanceGulagStreak } from "./gulagStreakService";
 
 // ---------------------------------------------------------------------------
 // Validation
@@ -93,12 +94,54 @@ async function fetchActiveQuests(
   userId: number
 ): Promise<QuestRow[]> {
   const { rows } = await client.query<QuestRow>(
-    `SELECT id, user_id, title, xp_reward, quest_type, status, streak_count
+    `SELECT id, user_id, title, xp_reward, quest_type, status, streak_count,
+            last_streak_date, created_at
      FROM quests
      WHERE user_id = $1 AND status = 'ACTIVE'`,
     [userId]
   );
   return rows;
+}
+
+async function maybeAdvanceGulagStreak(
+  client: PoolClient,
+  userId: number,
+  user: UserRow,
+  referenceTimestamp: string
+): Promise<{
+  newState: UserRow["state"];
+  toastMessages: string[];
+  xpAwarded: number;
+  leveledUp: boolean;
+  tokenAwarded: GameEngineResult["tokenAwarded"];
+} | null> {
+  if (user.state !== "GULAG" && user.state !== "REDEMPTION") {
+    return null;
+  }
+
+  const activeQuests = await fetchActiveQuests(client, userId);
+  const gulagQuest = activeQuests.find(
+    (q) => q.quest_type === "GULAG_REDEMPTION"
+  );
+  if (gulagQuest === undefined) {
+    return null;
+  }
+
+  const streakResult = await tryAdvanceGulagStreak(
+    client,
+    userId,
+    user,
+    gulagQuest,
+    referenceTimestamp
+  );
+
+  return {
+    newState: streakResult.newState,
+    toastMessages: streakResult.toastMessages,
+    xpAwarded: streakResult.xpAwarded,
+    leveledUp: streakResult.leveledUp,
+    tokenAwarded: streakResult.tokenAwarded,
+  };
 }
 
 async function getTodaysDiscretionaryTotal(
@@ -182,9 +225,16 @@ export async function processTransaction(
     };
 
     // ------------------------------------------------------------------
-    // Branch 1: FIXED_BILL — deduct balance, log, stop. No game logic.
+    // Branch 1: FIXED_BILL — deduct balance, log. Gulag streak may advance.
     // ------------------------------------------------------------------
     if (system_category === "FIXED_BILL") {
+      const streakAdvance = await maybeAdvanceGulagStreak(
+        client,
+        userId,
+        user,
+        payload.timestamp
+      );
+
       await client.query(
         `UPDATE users SET playable_balance = playable_balance - $2 WHERE id = $1`,
         [userId, amount]
@@ -194,7 +244,19 @@ export async function processTransaction(
          VALUES ($1, $2, $3, $4, false)`,
         [userId, amount, merchant, system_category]
       );
-      return baseResult;
+
+      if (streakAdvance === null) {
+        return baseResult;
+      }
+
+      return {
+        ...baseResult,
+        newState: streakAdvance.newState,
+        xpAwarded: streakAdvance.xpAwarded,
+        leveledUp: streakAdvance.leveledUp,
+        tokenAwarded: streakAdvance.tokenAwarded,
+        toastMessages: streakAdvance.toastMessages,
+      };
     }
 
     // All remaining branches are DISCRETIONARY.
@@ -216,10 +278,17 @@ export async function processTransaction(
     }
 
     // ------------------------------------------------------------------
-    // Branch 3: REDEMPTION — deduct balance, log (not a new violation),
-    // keep state frozen. XP stays frozen per PRD Section 5.
+    // Branch 3: REDEMPTION — deduct balance, log, streak may advance.
+    // XP stays frozen until Gulag exit per PRD Section 5.
     // ------------------------------------------------------------------
     if (user.state === "REDEMPTION") {
+      const streakAdvance = await maybeAdvanceGulagStreak(
+        client,
+        userId,
+        user,
+        payload.timestamp
+      );
+
       await client.query(
         `UPDATE users SET playable_balance = playable_balance - $2 WHERE id = $1`,
         [userId, amount]
@@ -229,7 +298,19 @@ export async function processTransaction(
          VALUES ($1, $2, $3, $4, false)`,
         [userId, amount, merchant, system_category]
       );
-      return baseResult;
+
+      if (streakAdvance === null) {
+        return baseResult;
+      }
+
+      return {
+        ...baseResult,
+        newState: streakAdvance.newState,
+        xpAwarded: streakAdvance.xpAwarded,
+        leveledUp: streakAdvance.leveledUp,
+        tokenAwarded: streakAdvance.tokenAwarded,
+        toastMessages: streakAdvance.toastMessages,
+      };
     }
 
     // ------------------------------------------------------------------

@@ -76,6 +76,8 @@ function makeQuest(overrides: Partial<{
   quest_type: "DAILY" | "WEEKLY" | "GULAG_REDEMPTION";
   status: "ACTIVE" | "COMPLETE" | "FAILED";
   streak_count: number;
+  last_streak_date: string | null;
+  created_at: string;
 }> = {}) {
   return {
     id: 10,
@@ -85,8 +87,26 @@ function makeQuest(overrides: Partial<{
     quest_type: "DAILY" as const,
     status: "ACTIVE" as const,
     streak_count: 0,
+    last_streak_date: null,
+    created_at: "2026-05-01T12:00:00.000Z",
     ...overrides,
   };
+}
+
+function makeGulagRedemptionQuest(
+  overrides: Partial<{
+    streak_count: number;
+    last_streak_date: string | null;
+    created_at: string;
+  }> = {}
+) {
+  return makeQuest({
+    id: 50,
+    title: "Gulag Redemption",
+    xp_reward: 50,
+    quest_type: "GULAG_REDEMPTION",
+    ...overrides,
+  });
 }
 
 const baseDiscretionary = {
@@ -170,9 +190,9 @@ describe("processTransaction", () => {
     setupQueries(mockQuery, [
       { rows: [] },
       { rows: [makeUser({ state: "GULAG" })] },
-      { rows: [] },   // UPDATE balance
-      { rows: [] },   // INSERT transaction
-      { rows: [] },   // COMMIT
+      { rows: [] },
+      { rows: [] },
+      { rows: [] },
     ]);
 
     const result = await processTransaction(baseDiscretionary, 1);
@@ -180,6 +200,7 @@ describe("processTransaction", () => {
     expect(result.newState).toBe("GULAG");
     expect(result.isViolation).toBe(true);
     expect(result.xpAwarded).toBe(0);
+    expect(result.toastMessages).toHaveLength(0);
   });
 
   // -------------------------------------------------------------------------
@@ -193,6 +214,7 @@ describe("processTransaction", () => {
       { rows: [] },
       { rows: [] },
       { rows: [] },
+      { rows: [] },
     ]);
 
     const result = await processTransaction(baseFixedBill, 1);
@@ -200,6 +222,33 @@ describe("processTransaction", () => {
     expect(result.newState).toBe("GULAG");
     expect(result.isViolation).toBe(false);
     expect(result.xpAwarded).toBe(0);
+  });
+
+  it("GULAG + FIXED_BILL with zero yesterday: streak advances to REDEMPTION", async () => {
+    const mockQuery = buildMockClient();
+    const gulagQuest = makeGulagRedemptionQuest({
+      created_at: "2026-05-20T12:00:00.000Z",
+    });
+    setupQueries(mockQuery, [
+      { rows: [] },
+      { rows: [makeUser({ state: "GULAG" })] },
+      { rows: [gulagQuest] },
+      { rows: [{ count: "0" }] },
+      { rows: [] },
+      { rows: [] },
+      { rows: [] },
+      { rows: [] },
+      { rows: [] },
+    ]);
+
+    const result = await processTransaction(
+      { ...baseFixedBill, timestamp: "2026-05-24T10:00:00.000Z" },
+      1
+    );
+
+    expect(result.newState).toBe("REDEMPTION");
+    expect(result.isViolation).toBe(false);
+    expect(result.toastMessages).toContain("Day 1 of 3 complete. 2 more.");
   });
 
   // -------------------------------------------------------------------------

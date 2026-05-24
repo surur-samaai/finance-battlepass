@@ -1,50 +1,87 @@
+import XPBar from './XPBar'
+
 interface GulagOverlayProps {
-  streakCount?: number
+  userState: 'GULAG' | 'REDEMPTION'
+  streakCount: number
+  currentXP: number
+  xpToNext: number
+  questTitle?: string
 }
 
-export default function GulagOverlay({ streakCount = 1 }: GulagOverlayProps) {
+export default function GulagOverlay({
+  userState,
+  streakCount,
+  currentXP,
+  xpToNext,
+  questTitle = 'Gulag Redemption',
+}: GulagOverlayProps) {
+  const isRedemption = userState === 'REDEMPTION'
+  const accentBorder = isRedemption ? 'border-amber-900/50' : 'border-red-900/50'
+  const accentBg = isRedemption ? 'bg-amber-950/20' : 'bg-red-950/20'
+  const accentText = isRedemption ? 'text-amber-400' : 'text-red-400'
+  const questBorder = isRedemption ? 'border-amber-900/40' : 'border-red-900/40'
+  const questBg = isRedemption ? 'bg-amber-900/10' : 'bg-red-900/10'
+  const dotFilled = isRedemption ? 'bg-amber-400' : 'bg-red-400'
+
   return (
-    <div className="rounded-xl border border-red-900/50 bg-red-950/20 p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <span className="text-2xl">🔒</span>
-        <h2 className="text-xl font-black tracking-widest text-red-400 uppercase">
-          Battle Pass Frozen
+    <div className={`rounded-xl border ${accentBorder} ${accentBg} p-6`}>
+      <div className="flex items-center gap-3 mb-2">
+        <span className="text-2xl">{isRedemption ? '⏳' : '🔒'}</span>
+        <h2 className={`text-xl font-black tracking-widest uppercase ${accentText}`}>
+          Battle Pass Locked
         </h2>
       </div>
 
-      <div className="w-full mb-4">
-        <div className="flex justify-between text-xs text-white/30 mb-1">
-          <span>XP frozen</span>
-          <span>XP frozen</span>
-        </div>
-        <div className="relative h-4 w-full rounded-full bg-white/10 overflow-hidden grayscale">
-          <div className="h-full rounded-full bg-gray-500 w-3/4" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-xs text-white/50">🔒</span>
-          </div>
-        </div>
+      <p className="text-sm text-white/60 mb-4">
+        Violation detected. Complete your Redemption Quest to unlock.
+      </p>
+
+      <div className="mb-4">
+        <p className="text-xs text-white/40 uppercase tracking-wider mb-2">
+          XP Progress — Frozen
+        </p>
+        <XPBar
+          currentXP={currentXP}
+          xpToNext={xpToNext}
+          isGulag={true}
+          lockedIcon={isRedemption ? 'hourglass' : 'padlock'}
+        />
       </div>
 
-      <div className="rounded-lg border border-red-900/40 bg-red-900/10 px-4 py-3">
-        <p className="text-sm font-semibold text-red-300 mb-1">Gulag Redemption Quest</p>
+      <div className={`rounded-lg border ${questBorder} ${questBg} px-4 py-3 mb-4`}>
+        <p className={`text-sm font-semibold ${accentText} mb-1`}>{questTitle}</p>
         <p className="text-xs text-white/50 mb-3">
-          Complete 3 consecutive zero-spend days to unlock your Battle Pass.
+          Complete 3 consecutive zero discretionary spend days to unlock your Battle Pass.
         </p>
         <div className="flex items-center gap-2">
           <span className="text-2xl font-black text-white">
-            Day {streakCount} / 3
+            {isRedemption
+              ? `Day ${streakCount} of 3 — Keep going.`
+              : `Day ${streakCount} of 3`}
           </span>
           <div className="flex gap-1">
             {[1, 2, 3].map((day) => (
               <div
                 key={day}
                 className={`h-3 w-3 rounded-full ${
-                  day <= streakCount ? 'bg-red-400' : 'bg-white/20'
+                  day <= streakCount ? dotFilled : 'bg-white/20'
                 }`}
               />
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="rounded-lg border border-white/10 bg-black/20 px-4 py-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-white/40 mb-1">
+          How to escape
+        </p>
+        <p className="text-xs text-white/50 leading-relaxed">
+          Spend nothing on discretionary purchases for 3 consecutive calendar days.
+          Fixed bills (rent, medical aid, etc.) do not count against your streak.
+          Each qualifying day advances your redemption progress automatically when
+          the next bank transaction is processed.
+        </p>
       </div>
     </div>
   )

@@ -13,6 +13,7 @@ interface WebhookFormState {
   amount: string
   merchant: string
   system_category: 'FIXED_BILL' | 'DISCRETIONARY'
+  timestamp: string
 }
 
 export default function DevToolsPanel({ userId, onWebhookSuccess, showToasts }: DevToolsPanelProps) {
@@ -21,6 +22,7 @@ export default function DevToolsPanel({ userId, onWebhookSuccess, showToasts }: 
     amount: '',
     merchant: '',
     system_category: 'DISCRETIONARY',
+    timestamp: '',
   })
   const [result, setResult] = useState<GameEngineResult | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -33,12 +35,17 @@ export default function DevToolsPanel({ userId, onWebhookSuccess, showToasts }: 
     setIsFiring(true)
 
     try {
+      const timestamp =
+        form.timestamp.trim() !== ''
+          ? new Date(form.timestamp).toISOString()
+          : new Date().toISOString()
+
       const data = await fireMockBankWebhook({
         user_id: userId,
         amount: parseFloat(form.amount),
         merchant: form.merchant,
         system_category: form.system_category,
-        timestamp: new Date().toISOString(),
+        timestamp,
       })
       setResult(data)
       if (data.toastMessages.length > 0) {
@@ -88,6 +95,18 @@ export default function DevToolsPanel({ userId, onWebhookSuccess, showToasts }: 
               onChange={(e) => setForm((prev) => ({ ...prev, merchant: e.target.value }))}
               placeholder="e.g. Nando's Rondebosch"
               className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/20 focus:border-accent focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs text-white/50 mb-1">
+              Timestamp (optional — for multi-day Gulag streak testing)
+            </label>
+            <input
+              type="datetime-local"
+              value={form.timestamp}
+              onChange={(e) => setForm((prev) => ({ ...prev, timestamp: e.target.value }))}
+              className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-accent focus:outline-none"
             />
           </div>
 
