@@ -1,0 +1,11 @@
+# Backend API — https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: finance-battle-pass-api
+    runtime: node
+    buildCommand: npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
