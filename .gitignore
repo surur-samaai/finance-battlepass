@@ -5,3 +5,6 @@ server/.env
 .env
 client/.env
 *.log
+
+# Local Netlify folder
+.netlify

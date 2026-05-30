@@ -1,117 +1,64 @@
-# Finance Battle Pass
+# Cursor Prompts — Budgt Hero
 
-Turn your budget into a game. A personal finance gamification app inspired by battle-pass progression: earn XP from spending discipline, level up for wishlist tokens, and survive the Gulag when you break your quests.
+One prompt file per phase. Use them in order. Do not skip ahead.
 
-**Live demo:** _Add your Vercel URL after deploy_
+## How to use each prompt
 
-## Tech stack
+1. Open Cursor
+2. Switch to **Plan mode** (except Phase 10 and Phase 16 which go straight to Agent)
+3. Paste the full contents of the phase file
+4. Review Cursor's plan — if anything contradicts PRD.md or PRD_v2.md, correct it before proceeding
+5. Switch to **Agent mode** and let it build
+6. Manually verify every exit criteria checkbox before moving to the next phase
+7. **Commit to Git** before starting the next phase
 
-- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, React Router
-- **Backend:** Node.js, Express, TypeScript
-- **Database:** PostgreSQL
-- **Auth:** Google OAuth 2.0 (Passport.js + express-session)
-- **Deploy:** Railway (API + DB), Vercel (client)
+---
 
-## Local development
+## Phase index
 
-### Prerequisites
+### v1 Phases (complete)
+| File | Phase | Status |
+|---|---|---|
+| `PHASE_1_FOUNDATION.md` | Foundation | ✅ Done |
+| `PHASE_2_GAME_LOGIC_ENGINE.md` | Game Logic Engine | ✅ Done |
+| `PHASE_3_FRONTEND_SHELL.md` | Frontend Shell | ✅ Done |
+| `PHASE_4_WIRE_UP.md` | Wire Up | ✅ Done |
+| `PHASE_5_AUTH.md` | Auth (Passport.js) | ✅ Done — replaced in Phase 11 |
+| `PHASE_6_VAULT_WISHLIST.md` | Vault & Wishlist | ✅ Done |
+| `PHASE_7_GULAG_UI.md` | Gulag UI | ✅ Done — renamed in Phase 10 |
+| `PHASE_8_SEASON_RESET.md` | Season Reset | ✅ Done |
+| `PHASE_9_POLISH_DEPLOY.md` | Polish & Deploy | ✅ Done |
 
-- Node.js 20+
-- PostgreSQL (local or Supabase)
-- Google Cloud OAuth credentials
+### v2 Phases (current)
+| File | Phase | Key output |
+|---|---|---|
+| `PHASE_10_REBRAND.md` | Rebrand | All v1 names replaced with Budgt Hero naming system |
+| `PHASE_11_AUTH_OVERHAUL.md` | Auth Overhaul | Supabase Auth, email/password, Google, remember me, password reset |
+| `PHASE_12_ONBOARDING_REDESIGN.md` | Onboarding | 5-step onboarding, character name, Stitch placeholder |
+| `PHASE_13_BUDGTEER_CHARACTER.md` | Budgteer Character | DiceBear avatar, Gem economy, cosmetic shop backend |
+| `PHASE_14_STITCH_INTEGRATION.md` | Stitch Integration | Open Banking, real transactions, automatic quest tracking, cron job |
+| `PHASE_15_SHOP_V2.md` | The Shop v2 | Budgteer Shop tab, cosmetics purchase, avatar updates live |
+| `PHASE_16_POLISH_REDEPLOY.md` | Polish & Redeploy | Full v2 polish, Railway + Vercel redeployment, README |
 
-### 1. Database
+---
 
-Create a database and run migrations in order:
+## If Cursor goes off-script
+1. Do not argue in the same session — start a new chat
+2. Start with: "Read PRD_v2.md and PRD.md before doing anything."
+3. Describe the specific problem in one sentence
+4. Paste only the relevant section of the phase prompt
 
-```bash
-export DATABASE_URL="postgresql://user:password@localhost:5432/finance_battle_pass"
-for f in server/db/migrations/*.sql; do psql "$DATABASE_URL" -f "$f"; done
-```
+## If you need a schema change mid-build
+1. Stop. Do not let Cursor alter the schema inline.
+2. Write the migration SQL yourself (next number in sequence)
+3. Run it manually against the DB
+4. Tell Cursor: "I have added column X to table Y. Update any affected queries."
 
-### 2. Backend
-
-```bash
-cp .env.example server/.env
-# Edit server/.env: DATABASE_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SESSION_SECRET
-# Optional: API_URL=http://localhost:3000, CLIENT_URL=http://localhost:5173
-
-npm install
-npm run dev
-```
-
-Server runs at `http://localhost:3000`. Health check: `GET /health` → `{ "status": "ok" }`.
-
-In Google Cloud Console, set the authorized redirect URI to:
-
-`http://localhost:3000/auth/google/callback`
-
-### 3. Frontend
-
-```bash
-cd client
-cp .env.example .env
-# VITE_API_URL=http://localhost:3000
-
-npm install
-npm run dev
-```
-
-Client runs at `http://localhost:5173`.
-
-### 4. Tests
-
-From the repo root:
-
-```bash
-npm test
-```
-
-## Portfolio reviewers
-
-The **DevTools** panel on the Dashboard fires mock bank webhooks (no real bank integration). Use it to trigger XP gains, Gulag state, and redemption flows without external services.
-
-Run **Reset Season** once before sharing so Season History shows an archived season.
-
-## Deploy
-
-### Backend (Railway)
-
-1. Create a Railway project and add the PostgreSQL plugin.
-2. Deploy this repo from the root. Build: `npm run build`. Start: `npm start`.
-3. Run all files in `server/db/migrations/` against the Railway `DATABASE_URL` (SQL console or `psql`).
-4. Set environment variables:
-
-   | Variable | Example |
-   |----------|---------|
-   | `DATABASE_URL` | _(from Railway Postgres)_ |
-   | `NODE_ENV` | `production` |
-   | `SESSION_SECRET` | _(long random string)_ |
-   | `GOOGLE_CLIENT_ID` | |
-   | `GOOGLE_CLIENT_SECRET` | |
-   | `API_URL` | `https://your-app.up.railway.app` |
-   | `CLIENT_URL` | `https://your-app.vercel.app` |
-
-5. In Google Cloud Console, add redirect URI: `https://your-app.up.railway.app/auth/google/callback`
-6. Verify: `GET https://your-app.up.railway.app/health`
-
-### Frontend (Vercel)
-
-1. Import the GitHub repo; set **Root Directory** to `client`.
-2. Build command: `npm run build`. Output directory: `dist`.
-3. Environment variable: `VITE_API_URL=https://your-app.up.railway.app` (no trailing slash).
-4. Deploy. SPA routing is configured via `client/vercel.json`.
-5. Update Railway `CLIENT_URL` to your Vercel URL if not set yet.
-
-### Post-deploy checklist
-
-- [ ] Google login works on the live URL
-- [ ] Dashboard loads after login
-- [ ] DevTools webhook changes XP / Gulag state
-- [ ] Vault add/redeem works
-- [ ] Season reset archives a season
-
-## Project docs
-
-- [PRD.md](PRD.md) — product requirements
-- [cursor-prompts/](cursor-prompts/) — phased build prompts
+## Migration file sequence
+- 001–007: v1 migrations (complete)
+- 008: character columns on users
+- 009: shop_items + user_shop_items
+- 010: bank_connections
+- 011: drop sessions table
+- 012: supabase_id on users
+- Next: 013_...sql

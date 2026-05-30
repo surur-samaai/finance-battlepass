@@ -17,6 +17,7 @@ const { pool } = require("./db/index") as { pool: import("pg").Pool };
 import "./config/passport";
 
 import { requireAuth } from "./middleware/requireAuth";
+import { isAllowedCorsOrigin } from "./utils/corsOrigins";
 import authRouter from "./routes/auth";
 import userRouter from "./routes/user";
 import wishlistRouter from "./routes/wishlist";
@@ -43,7 +44,7 @@ app.use(
         callback(null, true);
         return;
       }
-      if (origin === clientUrl || /^http:\/\/localhost:\d+$/.test(origin)) {
+      if (isAllowedCorsOrigin(origin, clientUrl)) {
         callback(null, true);
         return;
       }
