@@ -39,7 +39,7 @@ export default function AddWishlistItemModal({ userId, onSuccess, onClose }: Add
       if (isManualMode) {
         const cost = parseInt(manualTokenCost, 10)
         if (isNaN(cost) || cost < 1) {
-          setError('Token cost must be a whole number of at least 1.')
+          setError('Coin cost must be a whole number of at least 1.')
           setIsSubmitting(false)
           return
         }
@@ -72,7 +72,7 @@ export default function AddWishlistItemModal({ userId, onSuccess, onClose }: Add
         className="w-full max-w-sm rounded-xl border border-white/10 bg-[#1a1a1a] p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg font-bold text-white mb-1">Add to Vault</h3>
+        <h3 className="text-lg font-bold text-white mb-1">Add to The Shop</h3>
         <p className="text-sm text-white/50 mb-6">Add a new item to your wishlist.</p>
 
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
@@ -106,7 +106,7 @@ export default function AddWishlistItemModal({ userId, onSuccess, onClose }: Add
           </div>
 
           <div className="rounded-md border border-accent/30 bg-accent/10 px-3 py-2 text-sm">
-            <span className="text-white/50">Suggested token cost: </span>
+            <span className="text-white/50">Suggested coin cost: </span>
             <span className="text-accent font-semibold">{suggestedLabel}</span>
           </div>
 
@@ -140,7 +140,7 @@ export default function AddWishlistItemModal({ userId, onSuccess, onClose }: Add
           {isManualMode && (
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-white/50 mb-1">Token Cost</label>
+                <label className="block text-xs text-white/50 mb-1">Coin Cost</label>
                 <input
                   type="number"
                   value={manualTokenCost}
@@ -152,14 +152,14 @@ export default function AddWishlistItemModal({ userId, onSuccess, onClose }: Add
                 />
               </div>
               <div>
-                <label className="block text-xs text-white/50 mb-1">Token Type</label>
+                <label className="block text-xs text-white/50 mb-1">Coin Type</label>
                 <select
                   value={manualTokenType}
                   onChange={(e) => setManualTokenType(e.target.value as 'MICRO' | 'STANDARD')}
                   className="w-full rounded-md border border-white/10 bg-[#1a1a1a] px-3 py-2 text-sm text-white focus:border-accent focus:outline-none"
                 >
-                  <option value="MICRO">Micro-Token</option>
-                  <option value="STANDARD">Standard Token</option>
+                  <option value="MICRO">Micro Coin</option>
+                  <option value="STANDARD">Standard Coin</option>
                 </select>
               </div>
             </div>
@@ -183,7 +183,7 @@ export default function AddWishlistItemModal({ userId, onSuccess, onClose }: Add
               disabled={isSubmitting}
               className="flex-1 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Adding…' : 'Add to Vault'}
+              {isSubmitting ? 'Adding…' : 'Add to The Shop'}
             </button>
           </div>
         </form>

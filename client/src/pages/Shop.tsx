@@ -8,11 +8,11 @@ import WishlistItem from '../components/WishlistItem'
 import RedemptionModal from '../components/RedemptionModal'
 import AddWishlistItemModal from '../components/AddWishlistItemModal'
 
-interface VaultProps {
+interface ShopProps {
   userId: number
 }
 
-export default function Vault({ userId }: VaultProps) {
+export default function Shop({ userId }: ShopProps) {
   const { items, microTokens, standardTokens, loading, error, refetch } = useWishlist(userId)
   const { showToasts } = useToast()
 
@@ -77,7 +77,7 @@ export default function Vault({ userId }: VaultProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-white/40 text-sm">Loading vault…</p>
+        <p className="text-white/40 text-sm">Loading The Shop…</p>
       </div>
     )
   }
@@ -100,12 +100,12 @@ export default function Vault({ userId }: VaultProps) {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">Wishlist Vault</h1>
+          <h1 className="text-2xl font-bold text-white mb-1">The Shop</h1>
           <p className="text-sm text-white/40">
-            Tokens available:{' '}
-            <span className="text-accent font-semibold">{microTokens} Micro</span>
+            Coins available:{' '}
+            <span className="text-accent font-semibold">{microTokens} Micro Coins</span>
             {' · '}
-            <span className="text-accent font-semibold">{standardTokens} Standard</span>
+            <span className="text-accent font-semibold">{standardTokens} Standard Coins</span>
           </p>
         </div>
         <button
@@ -119,7 +119,7 @@ export default function Vault({ userId }: VaultProps) {
       {items.length === 0 ? (
         <div className="py-12 text-center space-y-4 rounded-xl border border-white/10 bg-white/5">
           <p className="text-sm text-white/50 max-w-md mx-auto">
-            Your Vault is empty. Add items to start earning towards them.
+            The Shop is empty. Add items to start earning towards them.
           </p>
           <button
             onClick={() => setIsAddModalOpen(true)}

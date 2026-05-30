@@ -36,6 +36,6 @@ export function formatSuggestedCost(cost: SuggestedTokenCost): string {
   if ("manualRequired" in cost) {
     return "Set manually (required for prices over R800)";
   }
-  const label = cost.tokenType === "MICRO" ? "Micro-Token" : "Standard Token";
+  const label = cost.tokenType === "MICRO" ? "Micro Coin" : "Standard Coin";
   return `${cost.tokenCost} ${label}${cost.tokenCost !== 1 ? "s" : ""}`;
 }

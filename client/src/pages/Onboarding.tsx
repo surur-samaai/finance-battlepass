@@ -139,7 +139,7 @@ export default function Onboarding() {
         <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
           <h2 className="text-lg font-semibold text-white">Add a Wishlist Item</h2>
           <p className="text-sm text-white/40">
-            Add your first item to the Vault. Token cost is suggested based on price.
+            Add your first item to The Shop. Coin cost is suggested based on price.
           </p>
           <div>
             <label className="block text-xs text-white/50 mb-1">Item Name</label>

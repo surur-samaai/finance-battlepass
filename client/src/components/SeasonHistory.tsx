@@ -78,7 +78,7 @@ export default function SeasonHistory({ userId }: SeasonHistoryProps) {
                     <th className="pb-2 pr-4 font-medium">Season</th>
                     <th className="pb-2 pr-4 font-medium">Level Reached</th>
                     <th className="pb-2 pr-4 font-medium">XP Earned</th>
-                    <th className="pb-2 font-medium">Tokens Spent</th>
+                    <th className="pb-2 font-medium">Coins Spent</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -1,0 +1,155 @@
+# Cursor Rules — Budgt Hero (v2)
+
+## The Prime Directive
+
+PRD_v2.md and PRD.md at the project root are the sources of truth.
+PRD_v2.md takes precedence for anything it covers. PRD.md governs v1 mechanics not overridden by v2.
+Read both before writing any code. Do not contradict either. Do not add features not listed in them.
+If you think a PRD decision is wrong, say so explicitly before proceeding — do not silently work around it.
+
+---
+
+## Naming System (Non-Negotiable)
+
+The following names must be used in all frontend copy, UI labels, component names, and API response fields.
+DB column names are NOT renamed — mask them at the API response layer if they differ.
+
+| Use This    | Never Use This                  |
+| ----------- | ------------------------------- |
+| Budgt Hero  | Finance Battle Pass             |
+| Budgteer    | Budgeteer, character            |
+| Budgt Pass  | Battle Pass                     |
+| Budgt Break | Gulag                           |
+| Coins       | Tokens (for wishlist currency)  |
+| Gems        | (cosmetic currency — new in v2) |
+| The Shop    | Wishlist Vault                  |
+| Quests      | (unchanged)                     |
+| Profile     | Loadout                         |
+
+If you are about to write "Gulag", "Battle Pass", or "Tokens" in any user-facing string, stop and use the correct v2 name.
+
+---
+
+## TypeScript
+
+- Strict TypeScript throughout. Zero `any` types. Ever.
+- If you cannot type something properly, stop and ask rather than using `any` or `unknown` as a shortcut.
+- All shared types and interfaces live in:
+  - `server/src/types/` for backend types
+  - `client/src/types/` for frontend types
+- Use `interface` for object shapes, `type` for unions and aliases.
+- The `AvatarConfig` interface is defined once in `client/src/types/character.ts` and imported wherever needed.
+
+---
+
+## Authentication (v2 — Supabase Auth)
+
+- Auth is handled entirely by Supabase Auth. Do not use or extend Passport.js — it has been replaced.
+- Do not use `localStorage` or `sessionStorage` for auth tokens. Supabase JS client manages session persistence.
+- All `/api/*` routes are protected. Use Supabase's server-side session verification middleware.
+- The `sessions` table from v1 is dropped. Do not reference it.
+- "Remember me" is implemented via Supabase session expiry settings — do not build a custom implementation.
+
+---
+
+## Backend (Express + Node.js)
+
+- Never put business logic inside a route handler. Route handlers call services; services contain logic.
+- The Game Logic Engine lives exclusively in `server/src/services/gameLogicEngine.ts`. Do not duplicate or modify its core state machine logic — new transaction sources (Stitch) feed into it, they do not replace it.
+- All game constants (XP values, level thresholds, token rules, Gem prices) come from `server/src/constants/gameConfig.ts`. No magic numbers inline — ever.
+- All DB writes that touch more than one table must be wrapped in a single `pg` transaction. Never partial-save.
+- Never alter the DB schema by modifying existing migration files. Always create a new numbered migration file.
+- Current migration count is at `010_bank_connections.sql`. Next migration is `011_...sql`.
+
+---
+
+## Stitch Integration
+
+- Stitch credentials (`STITCH_CLIENT_ID`, `STITCH_CLIENT_SECRET`, `STITCH_WEBHOOK_SECRET`) come from env vars only. Never hardcode them.
+- Never expose `access_token` or `refresh_token` from `bank_connections` in any API response.
+- Always validate the Stitch webhook signature before processing any webhook payload.
+- Category mapping from Stitch transaction types to `FIXED_BILL | DISCRETIONARY` lives in `gameConfig.ts` as `STITCH_CATEGORY_MAP`. Do not inline it in the webhook handler.
+- The mock bank webhook (`POST /api/webhooks/mock-bank`) must remain functional for dev/testing even after Stitch is live.
+
+---
+
+## DiceBear Avatar
+
+- Use the DiceBear API v9: `https://api.dicebear.com/9.x/`
+- Avatar configuration is stored as JSONB in `users.avatar_config`.
+- The `AvatarConfig` interface is the canonical shape — do not add fields to it without updating the interface.
+- Construct DiceBear URLs from the stored config — do not store the full URL in the DB.
+- Cosmetic purchases update `users.avatar_config` — this must happen in a single DB write, not multiple sequential updates.
+
+---
+
+## Database
+
+- Use the exact column names and types defined in PRD.md and PRD_v2.md. Do not rename columns or change types without creating a migration.
+- Never drop a column without explicit instruction.
+- Always use parameterised queries. Never interpolate user input directly into SQL strings.
+- New v2 tables: `bank_connections`, `shop_items`, `user_shop_items`.
+- New v2 columns on `users`: `budgteer_name`, `avatar_config`, `gems`, `onboarding_complete`, `bank_connected`, `login_streak`, `last_login_date`.
+
+---
+
+## Frontend (React + Vite)
+
+- No component libraries. Tailwind CSS utility classes only.
+- No `localStorage` or `sessionStorage`. Auth state is managed by Supabase JS client. App state lives in React state or comes from the API.
+- All API calls go through the typed functions in `client/src/api/`. Never make raw `axios` or `fetch` calls from inside a component.
+- Always handle loading and error states explicitly.
+- Dark mode only. Do not add light mode classes.
+- Primary accent colour is `#4A90D9`. Do not introduce other accent colours without instruction.
+- Toast messages must use the exact strings defined in PRD.md Section 10 and any additions in PRD_v2.md. Do not paraphrase them.
+- The Budgteer avatar must re-render whenever `users.avatar_config` changes — do not cache the DiceBear URL in a way that prevents updates.
+
+---
+
+## Onboarding
+
+- `onboarding_complete` on the `users` table is the gating flag. If `false`, always redirect to onboarding.
+- Onboarding completes exactly once. Do not allow re-entry after `onboarding_complete = true`.
+- Users who skip bank connection (`bank_connected = false`) still complete onboarding and reach the dashboard.
+- Manual quest completion buttons are shown to users with `bank_connected = false`. They are hidden for users with `bank_connected = true` (transaction-based quests only).
+
+---
+
+## Cron Jobs
+
+- The daily midnight cron job lives in `server/src/jobs/dailyQuestEvaluator.ts`.
+- It must be idempotent — running it twice on the same day must not double-award XP or Gems.
+- Test it by calling it manually via a dev-only endpoint before relying on the scheduler.
+
+---
+
+## File and Folder Structure
+
+Follow the structure from PRD.md Section 12 plus these v2 additions:
+
+- `server/src/services/stitchService.ts` — all Stitch API calls
+- `server/src/services/characterService.ts` — Gem awards, avatar updates, shop purchases
+- `server/src/jobs/dailyQuestEvaluator.ts` — midnight cron logic
+- `client/src/pages/Onboarding.tsx` — redesigned onboarding flow
+- `client/src/pages/Shop.tsx` — The Shop (wishlist + cosmetics tabs)
+- `client/src/components/BudgteerAvatar.tsx` — avatar rendering component
+- `client/src/components/BudgteerShop.tsx` — cosmetics shop tab
+- `server/db/migrations/` — migrations 008 through 010 are defined in PRD_v2.md
+
+---
+
+## Communication Rules
+
+- If a task is ambiguous, ask one clarifying question before writing any code.
+- If you are about to do something that contradicts PRD.md or PRD_v2.md, stop and say so explicitly.
+- If you think a better approach exists, say so — but implement the PRD version unless told otherwise.
+- Do not silently skip parts of an instruction. If you cannot complete something, say what you skipped and why.
+- When a phase prompt references an exit criteria checklist, do not consider the task done until all items are addressed.
+
+---
+
+## Git Hygiene
+
+- Do not generate or suggest committing secrets, `.env` files, or API keys.
+- `.env` files are always `.gitignore`d. `.env.example` is always committed and up to date.
+- `STITCH_CLIENT_ID`, `STITCH_CLIENT_SECRET`, and `STITCH_WEBHOOK_SECRET` must never appear in committed code.

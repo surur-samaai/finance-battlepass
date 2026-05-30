@@ -1,4 +1,5 @@
 import type { Quest } from '../types'
+import { rebrandQuestTitle } from '../utils/rebrandCopy'
 
 interface QuestCardProps {
   quest: Quest
@@ -15,7 +16,7 @@ const questTypePill: Record<Quest['quest_type'], string> = {
 const questTypeLabel: Record<Quest['quest_type'], string> = {
   DAILY: 'Daily',
   WEEKLY: 'Weekly',
-  GULAG_REDEMPTION: 'Gulag',
+  GULAG_REDEMPTION: 'Budgt Break',
 }
 
 export default function QuestCard({ quest, onComplete, isCompleting = false }: QuestCardProps) {
@@ -25,7 +26,7 @@ export default function QuestCard({ quest, onComplete, isCompleting = false }: Q
   return (
     <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3">
       <div className="flex flex-col gap-1">
-        <span className="font-medium text-white">{quest.title}</span>
+        <span className="font-medium text-white">{rebrandQuestTitle(quest.title)}</span>
         <div className="flex items-center gap-2">
           <span
             className={`rounded-full px-2 py-0.5 text-xs font-semibold ${

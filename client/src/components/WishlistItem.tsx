@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { WishlistItem as WishlistItemType } from '../types'
+import { formatCoinTier } from '../utils/rebrandCopy'
 
 interface WishlistItemProps {
   item: WishlistItemType
@@ -31,7 +32,8 @@ export default function WishlistItem({
 
   const tokenBalance = item.token_type === 'MICRO' ? microTokens : standardTokens
   const deficit = item.token_cost - tokenBalance
-  const tokenLabel = item.token_type === 'MICRO' ? 'Micro' : 'Standard'
+  const coinLabel = formatCoinTier(item.token_type, item.token_cost !== 1)
+  const deficitCoinLabel = formatCoinTier(item.token_type, deficit !== 1)
 
   if (item.is_purchased) {
     return (
@@ -43,8 +45,7 @@ export default function WishlistItem({
         </div>
         <p className="font-semibold text-white">{item.item_name}</p>
         <p className="text-sm text-white/40">
-          R{item.price_zar} · {item.token_cost} {tokenLabel} Token
-          {item.token_cost !== 1 ? 's' : ''}
+          R{item.price_zar} · {item.token_cost} {coinLabel}
         </p>
       </div>
     )
@@ -93,8 +94,7 @@ export default function WishlistItem({
       <div className="rounded-lg border-2 border-accent bg-white/5 p-4 wishlist-glow transition-shadow">
         <p className="font-semibold text-white">{item.item_name}</p>
         <p className="text-sm text-white/50 mb-3">
-          R{item.price_zar} · {item.token_cost} {tokenLabel} Token
-          {item.token_cost !== 1 ? 's' : ''}
+          R{item.price_zar} · {item.token_cost} {coinLabel}
         </p>
         <button
           onClick={() => onRedeem(item)}
@@ -117,11 +117,10 @@ export default function WishlistItem({
         <span className="text-lg">🔒</span>
       </div>
       <p className="text-sm text-white/50 mb-3">
-        R{item.price_zar} · {item.token_cost} {tokenLabel} Token
-        {item.token_cost !== 1 ? 's' : ''}
+        R{item.price_zar} · {item.token_cost} {coinLabel}
       </p>
       <p className="text-xs text-red-400">
-        Need {deficit} more {tokenLabel} Token{deficit !== 1 ? 's' : ''}
+        Need {deficit} more {deficitCoinLabel}
       </p>
       {redeemError !== undefined && (
         <p className="text-xs text-red-400 mt-2">{redeemError}</p>

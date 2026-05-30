@@ -1,6 +1,7 @@
 import XPBar from './XPBar'
+import { rebrandQuestTitle } from '../utils/rebrandCopy'
 
-interface GulagOverlayProps {
+interface BudgtBreakOverlayProps {
   userState: 'GULAG' | 'REDEMPTION'
   streakCount: number
   currentXP: number
@@ -8,13 +9,13 @@ interface GulagOverlayProps {
   questTitle?: string
 }
 
-export default function GulagOverlay({
+export default function BudgtBreakOverlay({
   userState,
   streakCount,
   currentXP,
   xpToNext,
-  questTitle = 'Gulag Redemption',
-}: GulagOverlayProps) {
+  questTitle = 'Budgt Break Redemption',
+}: BudgtBreakOverlayProps) {
   const isRedemption = userState === 'REDEMPTION'
   const accentBorder = isRedemption ? 'border-amber-900/50' : 'border-red-900/50'
   const accentBg = isRedemption ? 'bg-amber-950/20' : 'bg-red-950/20'
@@ -22,13 +23,14 @@ export default function GulagOverlay({
   const questBorder = isRedemption ? 'border-amber-900/40' : 'border-red-900/40'
   const questBg = isRedemption ? 'bg-amber-900/10' : 'bg-red-900/10'
   const dotFilled = isRedemption ? 'bg-amber-400' : 'bg-red-400'
+  const displayTitle = rebrandQuestTitle(questTitle)
 
   return (
     <div className={`rounded-xl border ${accentBorder} ${accentBg} p-6`}>
       <div className="flex items-center gap-3 mb-2">
         <span className="text-2xl">{isRedemption ? '⏳' : '🔒'}</span>
         <h2 className={`text-xl font-black tracking-widest uppercase ${accentText}`}>
-          Battle Pass Locked
+          Budgt Pass Locked
         </h2>
       </div>
 
@@ -49,9 +51,9 @@ export default function GulagOverlay({
       </div>
 
       <div className={`rounded-lg border ${questBorder} ${questBg} px-4 py-3 mb-4`}>
-        <p className={`text-sm font-semibold ${accentText} mb-1`}>{questTitle}</p>
+        <p className={`text-sm font-semibold ${accentText} mb-1`}>{displayTitle}</p>
         <p className="text-xs text-white/50 mb-3">
-          Complete 3 consecutive zero discretionary spend days to unlock your Battle Pass.
+          Complete 3 consecutive zero discretionary spend days to unlock your Budgt Pass.
         </p>
         <div className="flex items-center gap-2">
           <span className="text-2xl font-black text-white">

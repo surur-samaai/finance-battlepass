@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { rebrandUserFacingString } from "../utils/rebrandCopy";
 
 interface ToastItem {
   id: number;
@@ -26,7 +27,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     (messages: string[]) => {
       const newItems: ToastItem[] = messages.map((message) => ({
         id: nextId++,
-        message,
+        message: rebrandUserFacingString(message),
       }));
 
       setToasts((prev) => [...prev, ...newItems]);

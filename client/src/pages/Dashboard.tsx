@@ -5,9 +5,10 @@ import { completeQuest } from '../api/quests'
 import { extractErrorMessage } from '../api/client'
 import XPBar from '../components/XPBar'
 import QuestCard from '../components/QuestCard'
-import GulagOverlay from '../components/GulagOverlay'
+import BudgtBreakOverlay from '../components/BudgtBreakOverlay'
 import DevToolsPanel from '../components/DevToolsPanel'
 import SeasonHistory from '../components/SeasonHistory'
+import { formatUserState } from '../utils/rebrandCopy'
 
 interface DashboardProps {
   userId: number
@@ -75,20 +76,20 @@ export default function Dashboard({ userId }: DashboardProps) {
               stateBadge[user.state]
             }`}
           >
-            {user.state}
+            {formatUserState(user.state)}
           </span>
         </div>
 
-        {/* Token counts */}
+        {/* Coin counts */}
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5">
             <span className="text-sm">🪙</span>
-            <span className="text-xs text-white/50">Micro</span>
+            <span className="text-xs text-white/50">Micro Coins</span>
             <span className="text-sm font-bold text-accent">{user.wishlist_tokens_micro}</span>
           </div>
           <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5">
             <span className="text-sm">💎</span>
-            <span className="text-xs text-white/50">Standard</span>
+            <span className="text-xs text-white/50">Standard Coins</span>
             <span className="text-sm font-bold text-accent">{user.wishlist_tokens_standard}</span>
           </div>
         </div>
@@ -117,9 +118,9 @@ export default function Dashboard({ userId }: DashboardProps) {
           </div>
         </div>
 
-        {/* XP bar or Gulag overlay */}
+        {/* XP bar or Budgt Break overlay */}
         {isBattlePassLocked ? (
-          <GulagOverlay
+          <BudgtBreakOverlay
             userState={user.state === 'GULAG' ? 'GULAG' : 'REDEMPTION'}
             streakCount={gulagStreak}
             currentXP={user.current_xp}
@@ -156,7 +157,7 @@ export default function Dashboard({ userId }: DashboardProps) {
           ))}
           {quests.length === 0 && (
             <p className="text-sm text-white/30">
-              No active quests. Your Loadout is empty.
+              No active quests. Your Profile is empty.
             </p>
           )}
         </div>

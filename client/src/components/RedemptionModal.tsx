@@ -1,4 +1,5 @@
 import type { WishlistItem } from '../types'
+import { formatCoinTier } from '../utils/rebrandCopy'
 
 interface RedemptionModalProps {
   item: WishlistItem
@@ -9,7 +10,7 @@ interface RedemptionModalProps {
 }
 
 export default function RedemptionModal({ item, onClose, onConfirm, error, isConfirming = false }: RedemptionModalProps) {
-  const tokenLabel = item.token_type === 'MICRO' ? 'Micro' : 'Standard'
+  const coinLabel = formatCoinTier(item.token_type, item.token_cost !== 1)
 
   return (
     <div
@@ -27,7 +28,7 @@ export default function RedemptionModal({ item, onClose, onConfirm, error, isCon
           <p className="font-semibold text-white mb-1">{item.item_name}</p>
           <p className="text-sm text-white/50">R{item.price_zar}</p>
           <p className="text-sm text-accent font-semibold mt-1">
-            Cost: {item.token_cost} {tokenLabel} Token{item.token_cost !== 1 ? 's' : ''}
+            Cost: {item.token_cost} {coinLabel}
           </p>
         </div>
 

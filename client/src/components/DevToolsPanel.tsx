@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { fireMockBankWebhook } from '../api/webhooks'
 import { resetSeason } from '../api/admin'
 import { extractErrorMessage } from '../api/client'
+import { rebrandUserFacingString } from '../utils/rebrandCopy'
 import type { GameEngineResult, SeasonResetResult } from '../api/types'
 
 interface DevToolsPanelProps {
@@ -124,7 +125,7 @@ export default function DevToolsPanel({ userId, onWebhookSuccess, showToasts }: 
 
             <div>
               <label className="block text-xs text-white/50 mb-1">
-                Timestamp (optional — for multi-day Gulag streak testing)
+                Timestamp (optional — for multi-day Budgt Break streak testing)
               </label>
               <input
                 type="datetime-local"
@@ -187,7 +188,7 @@ export default function DevToolsPanel({ userId, onWebhookSuccess, showToasts }: 
                     <span className="text-white/40">messages: </span>
                     <ul className="mt-1 space-y-0.5 pl-2">
                       {result.toastMessages.map((msg, i) => (
-                        <li key={i} className="text-white/70">— {msg}</li>
+                        <li key={i} className="text-white/70">— {rebrandUserFacingString(msg)}</li>
                       ))}
                     </ul>
                   </div>
@@ -214,7 +215,7 @@ export default function DevToolsPanel({ userId, onWebhookSuccess, showToasts }: 
             ) : (
               <div className="rounded-md border border-red-500/30 bg-red-500/5 px-3 py-3 space-y-3">
                 <p className="text-sm text-white/70">
-                  This will reset XP, tokens, and lock the Wishlist. Season will be archived. Continue?
+                  This will reset XP, coins, and lock the Wishlist. Season will be archived. Continue?
                 </p>
                 <div className="flex gap-2">
                   <button
