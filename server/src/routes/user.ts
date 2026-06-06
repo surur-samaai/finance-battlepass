@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getDashboard } from "../services/dashboardService";
 import { getSeasonHistory } from "../services/seasonHistoryService";
+import { completeOnboarding } from "../services/authService";
 
 const router = Router();
 
@@ -44,6 +45,23 @@ router.get("/:id/seasons", async (req, res) => {
     res.json(seasons);
   } catch (err) {
     console.error("Season history fetch error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+router.post("/:id/onboarding/complete", async (req, res) => {
+  const routeUserId = parseInt(req.params["id"], 10);
+
+  if (isNaN(routeUserId) || routeUserId !== req.user!.id) {
+    res.status(403).json({ error: "Forbidden." });
+    return;
+  }
+
+  try {
+    await completeOnboarding(routeUserId);
+    res.json({ onboarding_complete: true });
+  } catch (err) {
+    console.error("Onboarding complete error:", err);
     res.status(500).json({ error: "Internal server error." });
   }
 });

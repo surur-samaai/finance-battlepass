@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { suggestWishlistTokenCost, formatSuggestedCost } from '../utils/wishlistPricing'
+import { useAuth } from '../hooks/useAuth'
+import { completeOnboarding } from '../api/user'
 
 type Step = 1 | 2 | 3
 
@@ -10,7 +11,7 @@ interface FixedCostRow {
 }
 
 export default function Onboarding() {
-  const navigate = useNavigate()
+  const { appUser } = useAuth()
   const [step, setStep] = useState<Step>(1)
   const [income, setIncome] = useState('')
   const [fixedCosts, setFixedCosts] = useState<FixedCostRow[]>([{ name: '', amount: '' }])
@@ -30,9 +31,15 @@ export default function Onboarding() {
     )
   }
 
-  const advanceStep = () => {
-    if (step < 3) setStep((prev) => (prev + 1) as Step)
-    else navigate('/')
+  const advanceStep = async () => {
+    if (step < 3) {
+      setStep((prev) => (prev + 1) as Step)
+      return
+    }
+    if (appUser) {
+      await completeOnboarding(appUser.id)
+    }
+    window.location.replace('/')
   }
 
   const stepLabel = ['Monthly Income', 'Fixed Costs', 'Wishlist Item']

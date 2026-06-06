@@ -1,40 +1,49 @@
-import { Routes, Route, NavLink, Navigate } from 'react-router-dom'
-import { useAuth } from './hooks/useAuth'
-import { getGoogleLoginUrl } from './api/auth'
-import Dashboard from './pages/Dashboard'
-import Shop from './pages/Shop'
-import Onboarding from './pages/Onboarding'
-import { ToastProvider } from './context/ToastContext'
-import Toast from './components/Toast'
+import { Routes, Route, NavLink, Navigate } from "react-router-dom";
+import { useAuth } from "./hooks/useAuth";
+import Dashboard from "./pages/Dashboard";
+import Shop from "./pages/Shop";
+import Onboarding from "./pages/Onboarding";
+import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
+import { ToastProvider } from "./context/ToastContext";
+import Toast from "./components/Toast";
+
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center">
+      <p className="text-white/40 text-sm tracking-widest uppercase">
+        Loading…
+      </p>
+    </div>
+  );
+}
 
 export default function App() {
-  const { user, loading, logout } = useAuth()
+  const { session, appUser, loading, signOut } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center">
-        <p className="text-white/40 text-sm tracking-widest uppercase">Loading…</p>
-      </div>
-    )
+    return <LoadingScreen />;
   }
 
-  if (user === null) {
+  if (session === null) {
     return (
-      <div className="min-h-screen bg-[#0D0D0D] flex flex-col items-center justify-center gap-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-black text-white tracking-widest uppercase">
-            Budgt Hero
-          </h1>
-          <p className="text-white/40 text-sm">Turn your budget into a game.</p>
-        </div>
-        <a
-          href={getGoogleLoginUrl()}
-          className="rounded-lg border border-accent bg-accent/10 px-6 py-3 text-sm font-semibold text-accent hover:bg-accent/20 transition-colors"
-        >
-          Sign in with Google
-        </a>
-      </div>
-    )
+      <Routes>
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="*" element={<Auth />} />
+      </Routes>
+    );
+  }
+
+  if (appUser === null) {
+    return <LoadingScreen />;
+  }
+
+  if (!appUser.onboarding_complete) {
+    return (
+      <Routes>
+        <Route path="*" element={<Onboarding />} />
+      </Routes>
+    );
   }
 
   return (
@@ -50,7 +59,7 @@ export default function App() {
             end
             className={({ isActive }) =>
               `text-sm font-medium transition-colors ${
-                isActive ? 'text-accent' : 'text-white/50 hover:text-white'
+                isActive ? "text-accent" : "text-white/50 hover:text-white"
               }`
             }
           >
@@ -60,24 +69,14 @@ export default function App() {
             to="/shop"
             className={({ isActive }) =>
               `text-sm font-medium transition-colors ${
-                isActive ? 'text-accent' : 'text-white/50 hover:text-white'
+                isActive ? "text-accent" : "text-white/50 hover:text-white"
               }`
             }
           >
             The Shop
           </NavLink>
-          <NavLink
-            to="/onboarding"
-            className={({ isActive }) =>
-              `text-sm font-medium transition-colors ${
-                isActive ? 'text-accent' : 'text-white/50 hover:text-white'
-              }`
-            }
-          >
-            Onboarding
-          </NavLink>
           <button
-            onClick={logout}
+            onClick={() => void signOut()}
             className="ml-auto text-sm font-medium text-white/40 hover:text-white transition-colors"
           >
             Logout
@@ -86,14 +85,18 @@ export default function App() {
 
         <main className="max-w-4xl mx-auto px-4 md:px-6 py-8">
           <Routes>
-            <Route path="/" element={<Dashboard userId={user.id} />} />
-            <Route path="/shop" element={<Shop userId={user.id} />} />
+            <Route path="/" element={<Dashboard userId={appUser.id} />} />
+            <Route path="/shop" element={<Shop userId={appUser.id} />} />
             <Route path="/vault" element={<Navigate to="/shop" replace />} />
-            <Route path="/onboarding" element={<Onboarding />} />
+            <Route
+              path="/onboarding"
+              element={<Navigate to="/" replace />}
+            />
+            <Route path="/reset-password" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
       </div>
       <Toast />
     </ToastProvider>
-  )
+  );
 }

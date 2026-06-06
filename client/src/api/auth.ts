@@ -1,20 +1,13 @@
 import { apiClient } from "./client";
 
-export interface AuthUser {
+export interface AppUser {
   id: number;
-  username: string;
   email: string;
+  username: string;
+  onboarding_complete: boolean;
 }
 
-export async function fetchMe(): Promise<AuthUser> {
-  const { data } = await apiClient.get<AuthUser>("/auth/me");
+export async function fetchMe(): Promise<AppUser> {
+  const { data } = await apiClient.get<AppUser>("/auth/me");
   return data;
-}
-
-export function getGoogleLoginUrl(): string {
-  return `${import.meta.env.VITE_API_URL as string}/auth/google`;
-}
-
-export function getLogoutUrl(): string {
-  return `${import.meta.env.VITE_API_URL as string}/auth/logout`;
 }

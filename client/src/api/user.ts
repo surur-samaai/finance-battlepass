@@ -10,3 +10,7 @@ export async function fetchSeasonHistory(userId: number): Promise<SeasonSummary[
   const { data } = await apiClient.get<SeasonSummary[]>(`/api/user/${userId}/seasons`);
   return data;
 }
+
+export async function completeOnboarding(userId: number): Promise<void> {
+  await apiClient.post(`/api/user/${userId}/onboarding/complete`);
+}
