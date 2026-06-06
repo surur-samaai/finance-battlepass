@@ -40,9 +40,13 @@ export default function App() {
 
   if (!appUser.onboarding_complete) {
     return (
-      <Routes>
-        <Route path="*" element={<Onboarding />} />
-      </Routes>
+      <ToastProvider>
+        <Routes>
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="*" element={<Navigate to="/onboarding" replace />} />
+        </Routes>
+        <Toast />
+      </ToastProvider>
     );
   }
 

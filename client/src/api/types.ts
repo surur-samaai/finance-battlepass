@@ -6,6 +6,7 @@ export interface ApiErrorResponse {
 
 export interface DashboardUser {
   username: string;
+  onboarding_complete: boolean;
   level: number;
   current_xp: number;
   xp_to_next_level: number;
@@ -43,6 +44,20 @@ export interface AddWishlistItemPayload {
   price_zar: number;
   token_cost?: number;
   token_type?: "MICRO" | "STANDARD";
+}
+
+export interface OnboardingCompletePayload {
+  budgteer_name: string;
+  monthly_income: number;
+  fixed_costs: {
+    name: string;
+    amount: number;
+  }[];
+  bank_connected: boolean;
+}
+
+export interface OnboardingCompleteResponse {
+  success: true;
 }
 
 export interface DeleteWishlistItemResponse {

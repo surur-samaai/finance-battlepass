@@ -72,10 +72,3 @@ export async function getUserById(id: number): Promise<AuthUser | null> {
 
   return rows[0] ?? null;
 }
-
-export async function completeOnboarding(userId: number): Promise<void> {
-  await pool.query(
-    `UPDATE users SET onboarding_complete = TRUE WHERE id = $1`,
-    [userId]
-  );
-}

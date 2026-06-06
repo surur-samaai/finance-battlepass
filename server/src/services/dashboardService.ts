@@ -4,6 +4,7 @@ import type { QuestType } from "../constants/gameConfig";
 
 interface DashboardUser {
   username: string;
+  onboarding_complete: boolean;
   level: number;
   current_xp: number;
   xp_to_next_level: number;
@@ -41,6 +42,7 @@ function computeXpToNextLevel(level: number): number {
 export async function getDashboard(userId: number): Promise<DashboardResult | null> {
   const { rows: userRows } = await pool.query<{
     username: string;
+    onboarding_complete: boolean;
     level: number;
     current_xp: number;
     playable_balance: string;
@@ -48,7 +50,7 @@ export async function getDashboard(userId: number): Promise<DashboardResult | nu
     wishlist_tokens_micro: number;
     wishlist_tokens_standard: number;
   }>(
-    `SELECT username, level, current_xp, playable_balance, state,
+    `SELECT username, onboarding_complete, level, current_xp, playable_balance, state,
             wishlist_tokens_micro, wishlist_tokens_standard
      FROM users
      WHERE id = $1`,
@@ -64,6 +66,7 @@ export async function getDashboard(userId: number): Promise<DashboardResult | nu
 
   const user: DashboardUser = {
     username: row.username,
+    onboarding_complete: row.onboarding_complete,
     level,
     current_xp: row.current_xp,
     xp_to_next_level: computeXpToNextLevel(level),
